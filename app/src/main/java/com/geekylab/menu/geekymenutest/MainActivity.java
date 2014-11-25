@@ -50,7 +50,11 @@ public class MainActivity extends Activity
         FragmentManager fragmentManager = getFragmentManager();
 
         Fragment target = null;
+        Log.d(TAG, "positon" + position);
         switch (position) {
+            case 0:
+                target = DashboardFragment.newInstance();
+                break;
             default:
                 target = PlaceholderFragment.newInstance(position + 1);
         }
