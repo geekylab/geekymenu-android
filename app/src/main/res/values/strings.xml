@@ -2,7 +2,7 @@
 <resources>
 
     <string name="app_name">GeekyMenuTest</string>
-    <string name="title_section1">Section 1</string>
+    <string name="store_category">Restaurant category</string>
     <string name="title_section2">Section 2</string>
     <string name="title_section3">Section 3</string>
     <string name="navigation_drawer_open">Open navigation drawer</string>
@@ -24,7 +24,9 @@
     <string name="mars">Mars</string>
     <string name="jupiter">Jupiter</string>
     <string name="saturn">Saturn</string>
-
+    <string name="store_list">Restaurant list</string>
+    <string name="mesa">Table</string>
+    <string name="user_setting">Settings</string>
 
 
 </resources>

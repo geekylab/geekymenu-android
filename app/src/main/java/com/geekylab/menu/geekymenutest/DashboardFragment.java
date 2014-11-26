@@ -5,15 +5,18 @@ import android.app.Activity;
 import android.app.Fragment;
 import android.app.ListFragment;
 import android.app.LoaderManager;
+import android.content.Intent;
 import android.content.Loader;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.GridView;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import com.geekylab.menu.geekymenutest.adapters.GlobalCategoryAdapter;
 import com.geekylab.menu.geekymenutest.network.DownloadJsonAsyncTaskHelper;
@@ -25,7 +28,7 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 
-public class DashboardFragment extends Fragment implements IFTaskCallback {
+public class DashboardFragment extends Fragment implements IFTaskCallback, AdapterView.OnItemClickListener {
 
     private static final String ARG_SECTION_NUMBER = "section_number";
     private static final String TAG = "DashboardFragment";
@@ -60,11 +63,17 @@ public class DashboardFragment extends Fragment implements IFTaskCallback {
     }
 
     @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+        ((MainActivity) activity).onSectionAttached(
+                getArguments().getInt(ARG_SECTION_NUMBER));
+    }
+
+    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         Log.d(TAG, "onCreateView");
         View view = inflater.inflate(R.layout.fragment_dashboard, container, false);
-
         new DownloadJsonAsyncTaskHelper(this.getActivity(), this).execute(OPEN_API_GLOBAL_CATEGORY);
 
         ListView listView = (ListView) view.findViewById(R.id.listView);
@@ -73,9 +82,11 @@ public class DashboardFragment extends Fragment implements IFTaskCallback {
         if (listView != null) {
             Log.d(TAG, "listView");
             listView.setAdapter(globalCategoryAdapter);
+            listView.setOnItemClickListener(this);
         } else if (gridView != null) {
             Log.d(TAG, "gridView");
             gridView.setAdapter(globalCategoryAdapter);
+            gridView.setOnItemClickListener(this);
         }
 
 
@@ -98,7 +109,23 @@ public class DashboardFragment extends Fragment implements IFTaskCallback {
                 e.printStackTrace();
             }
 
+            globalCategoryAdapter.notifyDataSetChanged();
             Log.d(TAG, "onFinish" + jsonObject.toString());
+        }
+    }
+
+    @Override
+    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+        JSONObject jsonObject = (JSONObject) parent.getItemAtPosition(position);
+        if (jsonObject.has("name")) {
+            String categoryName = "";
+            try {
+                categoryName = jsonObject.getString("name");
+            } catch (JSONException e) {
+            }
+//            Toast.makeText(this.getActivity(), categoryName, Toast.LENGTH_SHORT).show();
+            Intent i = new Intent(this.getActivity().getApplicationContext(), StoreListActivity.class);
+            startActivity(i);
         }
     }
 }
