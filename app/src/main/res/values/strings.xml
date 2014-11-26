@@ -27,6 +27,7 @@
     <string name="store_list">Restaurant list</string>
     <string name="mesa">Table</string>
     <string name="user_setting">Settings</string>
+    <string name="test_list">List</string>
 
 
 </resources>

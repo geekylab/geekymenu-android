@@ -17,7 +17,8 @@ import android.widget.TextView;
 
 
 public class MainActivity extends Activity
-        implements NavigationDrawerFragment.NavigationDrawerCallbacks {
+        implements NavigationDrawerFragment.NavigationDrawerCallbacks,
+        AbstractBaseListFragment.OnFragmentInteractionListener {
 
     private static final String TAG = "MainActivity";
     /**
@@ -54,7 +55,10 @@ public class MainActivity extends Activity
 
         switch (position) {
             case 0:
-                target = DashboardFragment.newInstance(position + 1);
+                target = GlobalCategoryListFragment.newInstance(position + 1);
+                break;
+            case 1:
+                target = GlobalCategoryListFragment.newInstance(position + 1);
                 break;
             default:
                 target = PlaceholderFragment.newInstance(position + 1);
@@ -85,6 +89,9 @@ public class MainActivity extends Activity
                 break;
             case 3:
                 mTitle = getString(R.string.user_setting);
+                break;
+            case 4:
+                mTitle = getString(R.string.test_list);
                 break;
         }
     }
@@ -139,6 +146,11 @@ public class MainActivity extends Activity
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onFragmentInteraction(String id) {
+        Log.d(TAG, id);
     }
 
     /**
