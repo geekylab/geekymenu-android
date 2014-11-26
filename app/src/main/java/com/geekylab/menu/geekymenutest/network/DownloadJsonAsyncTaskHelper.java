@@ -54,7 +54,7 @@ public class DownloadJsonAsyncTaskHelper extends AsyncTask<String, Integer, JSON
 
     @Override
     protected void onProgressUpdate(Integer... values) {
-        Log.d(TAG, "onProgressUpdate - " + values[0]);
+//        Log.d(TAG, "onProgressUpdate - " + values[0]);
         dialog.setProgress(values[0]);
     }
 
@@ -67,7 +67,6 @@ public class DownloadJsonAsyncTaskHelper extends AsyncTask<String, Integer, JSON
 
     @Override
     protected void onPostExecute(JSONObject jsonObject) {
-        Log.d(TAG, "onPostExecute" + jsonObject.toString());
         dialog.dismiss();
         this.callback.onFinish(jsonObject);
     }

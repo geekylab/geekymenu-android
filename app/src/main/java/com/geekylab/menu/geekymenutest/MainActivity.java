@@ -51,10 +51,10 @@ public class MainActivity extends Activity
         FragmentManager fragmentManager = getFragmentManager();
 
         Fragment target = null;
-        Log.d(TAG, "positon" + position);
+
         switch (position) {
             case 0:
-                target = DashboardFragment.newInstance();
+                target = DashboardFragment.newInstance(position + 1);
                 break;
             default:
                 target = PlaceholderFragment.newInstance(position + 1);
@@ -65,7 +65,7 @@ public class MainActivity extends Activity
                 .beginTransaction()
                 .replace(R.id.container, target);
 
-
+        transaction.setTransition(FragmentTransaction.TRANSIT_ENTER_MASK);
         if (position != mItemSelectedPosition) {
             transaction.addToBackStack(String.valueOf(mItemSelectedPosition));
         }

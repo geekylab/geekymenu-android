@@ -53,10 +53,8 @@ public class ImageDownloader {
         Bitmap bitmap = getBitmapFromCache(url);
 
         if (bitmap == null) {
-            Log.d(TAG, "No cache");
             forceDownload(url, imageView);
         } else {
-            Log.d(TAG, "Has cache");
             cancelPotentialDownload(url, imageView);
             imageView.setImageBitmap(bitmap);
         }
@@ -146,14 +144,11 @@ public class ImageDownloader {
 
     Bitmap downloadBitmap(String url) {
         final int IO_BUFFER_SIZE = 4 * 1024;
-        Log.d(TAG, "get " + url);
 
         // AndroidHttpClient is not allowed to be used from the main thread
         final HttpClient client = (mode == Mode.NO_ASYNC_TASK) ? new DefaultHttpClient() :
                 AndroidHttpClient.newInstance("Android");
         final HttpGet getRequest = new HttpGet(url);
-
-        Log.d(TAG, "get2 " + url);
 
         try {
             HttpResponse response = client.execute(getRequest);
@@ -171,7 +166,6 @@ public class ImageDownloader {
                     inputStream = entity.getContent();
                     // return BitmapFactory.decodeStream(inputStream);
                     // Bug on slow connections, fixed in future release.
-                    Log.d(TAG, "get3 " + url);
                     return BitmapFactory.decodeStream(new FlushedInputStream(inputStream));
                 } finally {
                     if (inputStream != null) {
