@@ -31,6 +31,7 @@ public class MainActivity extends Activity
      */
     private CharSequence mTitle;
     private int mItemSelectedPosition;
+    private int mFragmentSelected;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -123,9 +124,6 @@ public class MainActivity extends Activity
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         if (!mNavigationDrawerFragment.isDrawerOpen()) {
-            // Only show items in the action bar relevant to this screen
-            // if the drawer is not showing. Otherwise, let the drawer
-            // decide what to show in the action bar.
             getMenuInflater().inflate(R.menu.main, menu);
             restoreActionBar();
             return true;
@@ -135,9 +133,6 @@ public class MainActivity extends Activity
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
@@ -149,8 +144,19 @@ public class MainActivity extends Activity
     }
 
     @Override
-    public void onFragmentInteraction(String id) {
-        Log.d(TAG, id);
+    public void onFragmentInteraction(Fragment fragment) {
+        FragmentManager fragmentManager = getFragmentManager();
+        FragmentTransaction transaction = fragmentManager
+                .beginTransaction()
+                .replace(R.id.container, fragment);
+
+
+        transaction.setTransition(FragmentTransaction.TRANSIT_ENTER_MASK);
+//        Log.d(TAG, "" + fragment.getId());
+//        mFragmentSelected = fragment.getId();
+        transaction.addToBackStack(String.valueOf(mFragmentSelected));
+
+        transaction.commit();
     }
 
     /**

@@ -28,6 +28,7 @@
     <string name="mesa">Table</string>
     <string name="user_setting">Settings</string>
     <string name="test_list">List</string>
+    <string name="last_order">Last Order:</string>
 
 
 </resources>

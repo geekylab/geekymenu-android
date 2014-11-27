@@ -27,16 +27,10 @@ import com.geekylab.menu.geekymenutest.dummy.DummyContent;
  */
 public class AbstractBaseListFragment extends Fragment implements AbsListView.OnItemClickListener {
 
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_SECTION_NUMBER = "section_number";
     private static final String TAG = "DashboardFragment";
 
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
-
-    private OnFragmentInteractionListener mListener;
+    protected OnFragmentInteractionListener mListener;
 
     /**
      * The fragment's ListView/GridView.
@@ -49,11 +43,8 @@ public class AbstractBaseListFragment extends Fragment implements AbsListView.On
      */
     private ListAdapter mAdapter;
 
-    // TODO: Rename and change types of parameters
-    public static AbstractBaseListFragment newInstance(int sectionNumber) {
+    public static AbstractBaseListFragment newInstance(Bundle args) {
         AbstractBaseListFragment fragment = new AbstractBaseListFragment();
-        Bundle args = new Bundle();
-        args.putInt(ARG_SECTION_NUMBER, sectionNumber);
         fragment.setArguments(args);
         return fragment;
     }
@@ -112,11 +103,9 @@ public class AbstractBaseListFragment extends Fragment implements AbsListView.On
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        if (null != mListener) {
-            // Notify the active callbacks interface (the activity, if the
-            // fragment is attached to one) that an item has been selected.
-            mListener.onFragmentInteraction(DummyContent.ITEMS.get(position).id);
-        }
+//        if (null != mListener) {
+//            mListener.onFragmentInteraction(DummyContent.ITEMS.get(position).id);
+//        }
     }
 
     /**
@@ -143,8 +132,7 @@ public class AbstractBaseListFragment extends Fragment implements AbsListView.On
      * >Communicating with Other Fragments</a> for more information.
      */
     public interface OnFragmentInteractionListener {
-        // TODO: Update argument type and name
-        public void onFragmentInteraction(String id);
+        public void onFragmentInteraction(Fragment target);
     }
 
 }

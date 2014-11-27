@@ -11,11 +11,9 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.geekylab.menu.geekymenutest.R;
+import com.geekylab.menu.geekymenutest.db.entity.GlobalCategoryEntity;
 import com.geekylab.menu.geekymenutest.network.DownloadImageAsyncTaskHelper;
 import com.geekylab.menu.geekymenutest.network.ImageDownloader;
-
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.util.ArrayList;
 
@@ -23,14 +21,14 @@ import java.util.ArrayList;
  * Created by johna on 25/11/14.
  *
  */
-public class GlobalCategoryAdapter extends ArrayAdapter<JSONObject> {
+public class GlobalCategoryAdapter extends ArrayAdapter<GlobalCategoryEntity> {
     private static final String TAG = "GlobalCategoryAdapter";
     private final int resource;
-    private final ArrayList<JSONObject> objects;
+    private final ArrayList<GlobalCategoryEntity> objects;
     private final ImageDownloader imageDownloader = new ImageDownloader();
 
 
-    public GlobalCategoryAdapter(Context context, int resource, ArrayList<JSONObject> objects) {
+    public GlobalCategoryAdapter(Context context, int resource, ArrayList<GlobalCategoryEntity> objects) {
         super(context, resource, objects);
         this.objects = objects;
         this.resource = resource;
@@ -49,16 +47,13 @@ public class GlobalCategoryAdapter extends ArrayAdapter<JSONObject> {
             v = inflater.inflate(R.layout.category_list_item, null);
         }
 
-        JSONObject i = objects.get(position);
-        String categoryName = null;
-        String categoryImageUrl = "";
-        try {
-            categoryName = i.getString("name");
-            if (i.has("image_url"))
-                categoryImageUrl = i.getString("image_url");
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
+        GlobalCategoryEntity i = objects.get(position);
+
+        String categoryName = i.getName();
+        String categoryImageUrl = i.getImageUrl();
+
+        Log.d(TAG, "getView" + categoryName);
+
         TextView categoryNameTextView = (TextView) v.findViewById(R.id.categoryName);
         ImageView categoryImageView = (ImageView) v.findViewById(R.id.imageView);
         ProgressBar categoryImageViewProgressBar = (ProgressBar) v.findViewById(R.id.imageViewProgressBar);

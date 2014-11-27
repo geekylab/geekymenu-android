@@ -8,6 +8,7 @@ import android.util.Log;
 
 import com.geekylab.menu.geekymenutest.download.JSONParser;
 
+import org.apache.http.client.methods.HttpGet;
 import org.json.JSONObject;
 
 /**
@@ -19,14 +20,20 @@ public class DownloadJsonAsyncTaskHelper extends AsyncTask<String, Integer, JSON
 
     private static final String TAG = "DownloadJsonAsyncTaskHelper";
     private final IFTaskCallback callback;
+    private final String method;
     private ProgressDialog dialog;
     private final Context context;
     private final JSONParser jsonParse;
 
-    public DownloadJsonAsyncTaskHelper(Context context, IFTaskCallback callback) {
+    public DownloadJsonAsyncTaskHelper(Context context, IFTaskCallback callback, String method) {
         this.context = context;
         this.jsonParse = new JSONParser();
         this.callback = callback;
+        this.method = method;
+    }
+
+    public DownloadJsonAsyncTaskHelper(Context context, IFTaskCallback callback) {
+        this(context, callback, HttpGet.METHOD_NAME);
     }
 
     @Override
@@ -49,7 +56,7 @@ public class DownloadJsonAsyncTaskHelper extends AsyncTask<String, Integer, JSON
         Log.d(TAG, "doInBackground - " + params[0]);
 
         publishProgress(100);
-        return this.jsonParse.getJSONFromUrl(url);
+        return this.jsonParse.getJSONFromUrl(url, method);
     }
 
     @Override

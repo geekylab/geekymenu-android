@@ -2,6 +2,7 @@ package com.geekylab.menu.geekymenutest.download;
 
 /**
  * Created by johna on 25/11/14.
+ *
  */
 
 import android.util.Log;
@@ -10,6 +11,7 @@ import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -30,13 +32,20 @@ public class JSONParser {
     public JSONParser() {
     }
 
-    public JSONObject getJSONFromUrl(String url) {
+    public JSONObject getJSONFromUrl(String url, String method) {
         // Making HTTP request
         try {
             // defaultHttpClient
             DefaultHttpClient httpClient = new DefaultHttpClient();
-            HttpGet httpGet = new HttpGet(url);
-            HttpResponse httpResponse = httpClient.execute(httpGet);
+            HttpResponse httpResponse;
+            if (method.equals(HttpPost.METHOD_NAME)) {
+                HttpPost httpPost = new HttpPost(url);
+                httpResponse = httpClient.execute(httpPost);
+            } else {
+                HttpGet httpGet = new HttpGet(url);
+                httpResponse = httpClient.execute(httpGet);
+            }
+
             HttpEntity httpEntity = httpResponse.getEntity();
             is = httpEntity.getContent();
         } catch (UnsupportedEncodingException e) {
@@ -64,6 +73,7 @@ public class JSONParser {
         // try parse the string to a JSON object
         try {
             jObj = new JSONObject(json);
+            Log.d(TAG, json);
         } catch (JSONException e) {
             Log.e("JSON Parser", "Error parsing data " + e.toString());
         }
