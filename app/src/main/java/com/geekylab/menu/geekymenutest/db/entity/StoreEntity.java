@@ -10,7 +10,6 @@ import java.util.ArrayList;
 public class StoreEntity implements Serializable {
     protected String id;
     protected String store_name;
-    protected String desc;
     private int seatCount;
     private ArrayList<String> images;
     private String tel;
@@ -18,6 +17,7 @@ public class StoreEntity implements Serializable {
     private String startOpeningHour;
     private String endOpeningHour;
     private String lastOrderTime;
+    private String description;
 
     public String getId() {
         return id;
@@ -98,5 +98,13 @@ public class StoreEntity implements Serializable {
 
     public String getLastOrderTime() {
         return lastOrderTime;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public String getDescription() {
+        return description;
     }
 }

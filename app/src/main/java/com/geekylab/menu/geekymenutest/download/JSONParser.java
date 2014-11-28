@@ -9,7 +9,9 @@ import android.util.Log;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
+import org.apache.http.NameValuePair;
 import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.DefaultHttpClient;
@@ -21,6 +23,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
 
 public class JSONParser {
     private static final String TAG = "JSONParser";
@@ -33,6 +36,10 @@ public class JSONParser {
     }
 
     public JSONObject getJSONFromUrl(String url, String method) {
+        return getJSONFromUrl(url, method, null);
+    }
+
+    public JSONObject getJSONFromUrl(String url, String method, ArrayList<NameValuePair> postParameters) {
         // Making HTTP request
         try {
             // defaultHttpClient
@@ -40,6 +47,9 @@ public class JSONParser {
             HttpResponse httpResponse;
             if (method.equals(HttpPost.METHOD_NAME)) {
                 HttpPost httpPost = new HttpPost(url);
+                if (postParameters != null) {
+                    httpPost.setEntity(new UrlEncodedFormEntity(postParameters));
+                }
                 httpResponse = httpClient.execute(httpPost);
             } else {
                 HttpGet httpGet = new HttpGet(url);

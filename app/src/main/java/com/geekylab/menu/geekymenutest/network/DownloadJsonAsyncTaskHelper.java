@@ -8,12 +8,14 @@ import android.util.Log;
 
 import com.geekylab.menu.geekymenutest.download.JSONParser;
 
+import org.apache.http.NameValuePair;
 import org.apache.http.client.methods.HttpGet;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
+
 /**
  * Created by johna on 25/11/14.
- *
  */
 public class DownloadJsonAsyncTaskHelper extends AsyncTask<String, Integer, JSONObject>
         implements DialogInterface.OnCancelListener {
@@ -21,20 +23,30 @@ public class DownloadJsonAsyncTaskHelper extends AsyncTask<String, Integer, JSON
     private static final String TAG = "DownloadJsonAsyncTaskHelper";
     private final IFTaskCallback callback;
     private final String method;
+    private final ArrayList<NameValuePair> postParameters;
     private ProgressDialog dialog;
     private final Context context;
     private final JSONParser jsonParse;
 
-    public DownloadJsonAsyncTaskHelper(Context context, IFTaskCallback callback, String method) {
+    public DownloadJsonAsyncTaskHelper(Context context, IFTaskCallback callback, String method, ArrayList<NameValuePair> postParameters) {
         this.context = context;
         this.jsonParse = new JSONParser();
         this.callback = callback;
         this.method = method;
+        this.postParameters = postParameters;
+    }
+
+    public DownloadJsonAsyncTaskHelper(Context context, IFTaskCallback callback, String method) {
+        this(context, callback, method, null);
     }
 
     public DownloadJsonAsyncTaskHelper(Context context, IFTaskCallback callback) {
         this(context, callback, HttpGet.METHOD_NAME);
     }
+
+//    public DownloadJsonAsyncTaskHelper(Context context, IFTaskCallback callback) {
+//        this(context, callback, HttpGet.METHOD_NAME);
+//    }
 
     @Override
     protected void onPreExecute() {
@@ -56,7 +68,7 @@ public class DownloadJsonAsyncTaskHelper extends AsyncTask<String, Integer, JSON
         Log.d(TAG, "doInBackground - " + params[0]);
 
         publishProgress(100);
-        return this.jsonParse.getJSONFromUrl(url, method);
+        return this.jsonParse.getJSONFromUrl(url, method, postParameters);
     }
 
     @Override

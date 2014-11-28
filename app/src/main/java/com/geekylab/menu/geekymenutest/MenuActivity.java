@@ -1,16 +1,15 @@
 package com.geekylab.menu.geekymenutest;
 
-import java.util.Locale;
-
-import android.app.Activity;
 import android.app.ActionBar;
+import android.app.Activity;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
-import android.support.v13.app.FragmentPagerAdapter;
+import android.content.Intent;
 import android.os.Bundle;
+import android.support.v13.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
-import android.view.Gravity;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -18,8 +17,22 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.geekylab.menu.geekymenutest.db.entity.StoreEntity;
 
-public class MenuActivity extends Activity implements ActionBar.TabListener {
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.Locale;
+
+
+public class MenuActivity extends Activity implements
+        ActionBar.TabListener,
+        AbstractBaseListFragment.OnFragmentInteractionListener
+
+{
+
+    private static final String TAG = "MenuActivity";
+    private static final String DUMMY_STORE_ID = "547881eddc760d1200f02b7e";
 
     /**
      * The {@link android.support.v4.view.PagerAdapter} that will provide
@@ -93,6 +106,11 @@ public class MenuActivity extends Activity implements ActionBar.TabListener {
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
+
+            Intent intent = new Intent(MenuActivity.this, LoginActivity.class);
+            intent.setAction(Intent.ACTION_VIEW);
+            startActivity(intent);
+
             return true;
         }
 
@@ -103,6 +121,25 @@ public class MenuActivity extends Activity implements ActionBar.TabListener {
     public void onTabSelected(ActionBar.Tab tab, FragmentTransaction fragmentTransaction) {
         // When the given tab is selected, switch to the corresponding page in
         // the ViewPager.
+        Locale l = Locale.getDefault();
+        ActionBar actionBar = getActionBar();
+        String mTitle = "";
+        switch (tab.getPosition()) {
+            case 0:
+                mTitle = getString(R.string.title_about).toUpperCase(l);
+                break;
+            case 1:
+                mTitle = getString(R.string.title_menu).toUpperCase(l);
+                break;
+            case 2:
+                mTitle = getString(R.string.title_history).toUpperCase(l);
+                break;
+        }
+
+        if (actionBar != null) {
+            actionBar.setTitle(mTitle);
+        }
+
         mViewPager.setCurrentItem(tab.getPosition());
     }
 
@@ -112,6 +149,11 @@ public class MenuActivity extends Activity implements ActionBar.TabListener {
 
     @Override
     public void onTabReselected(ActionBar.Tab tab, FragmentTransaction fragmentTransaction) {
+    }
+
+    @Override
+    public void onFragmentInteraction(int position) {
+        Log.d(TAG, "" + position);
     }
 
     /**
@@ -128,7 +170,16 @@ public class MenuActivity extends Activity implements ActionBar.TabListener {
         public Fragment getItem(int position) {
             // getItem is called to instantiate the fragment for the given page.
             // Return a PlaceholderFragment (defined as a static inner class below).
-            return PlaceholderFragment.newInstance(position + 1);
+            Log.d(TAG, "" + position);
+            switch (position) {
+                case 0:
+                    return StoreFragment.newInstance(position + 1, DUMMY_STORE_ID);
+                case 1:
+                    return StoreCategoryListFragment.newInstance(position + 1, DUMMY_STORE_ID);
+                default:
+                    return HistoryFragment.newInstance(position + 1);
+            }
+
         }
 
         @Override
@@ -142,11 +193,11 @@ public class MenuActivity extends Activity implements ActionBar.TabListener {
             Locale l = Locale.getDefault();
             switch (position) {
                 case 0:
-                    return getString(R.string.title_section1).toUpperCase(l);
+                    return getString(R.string.title_about).toUpperCase(l);
                 case 1:
-                    return getString(R.string.title_section2).toUpperCase(l);
+                    return getString(R.string.title_menu).toUpperCase(l);
                 case 2:
-                    return getString(R.string.title_section3).toUpperCase(l);
+                    return getString(R.string.title_history).toUpperCase(l);
             }
             return null;
         }

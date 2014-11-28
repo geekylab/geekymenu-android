@@ -7,28 +7,26 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.geekylab.menu.geekymenutest.R;
 import com.geekylab.menu.geekymenutest.db.entity.GlobalCategoryEntity;
-import com.geekylab.menu.geekymenutest.network.DownloadImageAsyncTaskHelper;
+import com.geekylab.menu.geekymenutest.db.entity.StoreCategoryEntity;
 import com.geekylab.menu.geekymenutest.network.ImageDownloader;
 
 import java.util.ArrayList;
 
 /**
  * Created by johna on 25/11/14.
- *
  */
-public class GlobalCategoryAdapter extends ArrayAdapter<GlobalCategoryEntity> {
+public class StoreCategoryAdapter extends ArrayAdapter<StoreCategoryEntity> {
     private static final String TAG = "GlobalCategoryAdapter";
     private final int resource;
-    private final ArrayList<GlobalCategoryEntity> objects;
+    private final ArrayList<StoreCategoryEntity> objects;
     private final ImageDownloader imageDownloader = new ImageDownloader();
 
 
-    public GlobalCategoryAdapter(Context context, int resource, ArrayList<GlobalCategoryEntity> objects) {
+    public StoreCategoryAdapter(Context context, int resource, ArrayList<StoreCategoryEntity> objects) {
         super(context, resource, objects);
         this.objects = objects;
         this.resource = resource;
@@ -44,10 +42,10 @@ public class GlobalCategoryAdapter extends ArrayAdapter<GlobalCategoryEntity> {
 
         if (v == null) {
             LayoutInflater inflater = (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            v = inflater.inflate(R.layout.category_list_item, null);
+            v = inflater.inflate(resource, null);
         }
 
-        GlobalCategoryEntity i = objects.get(position);
+        StoreCategoryEntity i = objects.get(position);
 
         String categoryName = i.getName();
         String categoryImageUrl = i.getImageUrl();
@@ -62,7 +60,10 @@ public class GlobalCategoryAdapter extends ArrayAdapter<GlobalCategoryEntity> {
         if (categoryImageView != null) {
             categoryImageView.setTag(categoryImageUrl);
 //            new DownloadImageAsyncTaskHelper(categoryImageView, categoryImageViewProgressBar).execute(categoryImageUrl);
-            imageDownloader.download(categoryImageUrl, categoryImageView);
+            if (categoryImageUrl != null)
+                imageDownloader.download(categoryImageUrl, categoryImageView);
+            else
+                categoryImageView.setVisibility(View.INVISIBLE);
         }
 
         return v;

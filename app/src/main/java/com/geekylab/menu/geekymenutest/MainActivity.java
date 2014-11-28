@@ -144,19 +144,19 @@ public class MainActivity extends Activity
     }
 
     @Override
-    public void onFragmentInteraction(Fragment fragment) {
-        FragmentManager fragmentManager = getFragmentManager();
-        FragmentTransaction transaction = fragmentManager
-                .beginTransaction()
-                .replace(R.id.container, fragment);
-
-
-        transaction.setTransition(FragmentTransaction.TRANSIT_ENTER_MASK);
-//        Log.d(TAG, "" + fragment.getId());
-//        mFragmentSelected = fragment.getId();
-        transaction.addToBackStack(String.valueOf(mFragmentSelected));
-
-        transaction.commit();
+    public void onFragmentInteraction(int position) {
+//        FragmentManager fragmentManager = getFragmentManager();
+//        FragmentTransaction transaction = fragmentManager
+//                .beginTransaction()
+//                .replace(R.id.container, fragment);
+//
+//
+//        transaction.setTransition(FragmentTransaction.TRANSIT_ENTER_MASK);
+////        Log.d(TAG, "" + fragment.getId());
+////        mFragmentSelected = fragment.getId();
+//        transaction.addToBackStack(String.valueOf(mFragmentSelected));
+//
+//        transaction.commit();
     }
 
     /**

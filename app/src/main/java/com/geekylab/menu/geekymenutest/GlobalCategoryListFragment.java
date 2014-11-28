@@ -65,7 +65,7 @@ public class GlobalCategoryListFragment extends AbstractBaseListFragment impleme
             Bundle bundle = new Bundle();
             bundle.putString("store_id", itemAtPosition.getName());
 
-            mListener.onFragmentInteraction(StoreListFragment.newInstance(bundle));
+            mListener.onFragmentInteraction(1);
         }
     }
 

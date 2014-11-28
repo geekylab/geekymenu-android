@@ -82,7 +82,6 @@ public class ImageDownloader {
         if (cancelPotentialDownload(url, imageView)) {
             switch (mode) {
                 case NO_ASYNC_TASK:
-                    Log.d(TAG, "NO_ASYNC_TASK");
                     Bitmap bitmap = downloadBitmap(url);
                     addBitmapToCache(url, bitmap);
                     imageView.setImageBitmap(bitmap);

@@ -8,6 +8,7 @@
     <dimen name="navigation_drawer_width">240dp</dimen>
 
     <dimen name="dashboard3_margin">8dp</dimen>
+    <dimen name="store_title_margin">8dp</dimen>
     <dimen name="icon_margin">16dp</dimen>
     <dimen name="icon_margin2">8dp</dimen>
 </resources>

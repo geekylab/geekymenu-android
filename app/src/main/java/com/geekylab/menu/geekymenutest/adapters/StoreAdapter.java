@@ -58,7 +58,7 @@ public class StoreAdapter extends ArrayAdapter<StoreEntity> {
             storeMainImageUrl = images.get(0);
         }
 
-        ProgressBar categoryImageViewProgressBar = (ProgressBar) v.findViewById(R.id.imageViewProgressBar);
+//        ProgressBar categoryImageViewProgressBar = (ProgressBar) v.findViewById(R.id.imageViewProgressBar);
         TextView storeNameTextView = (TextView) v.findViewById(R.id.storeName);
         ImageView storeImageView = (ImageView) v.findViewById(R.id.imageView);
         TextView telTextView = (TextView) v.findViewById(R.id.tel);
@@ -79,7 +79,7 @@ public class StoreAdapter extends ArrayAdapter<StoreEntity> {
         if (storeImageView != null) {
             storeImageView.setTag(storeMainImageUrl);
             Log.d(TAG, storeMainImageUrl);
-            new DownloadImageAsyncTaskHelper(storeImageView, categoryImageViewProgressBar).execute(storeMainImageUrl);
+//            new DownloadImageAsyncTaskHelper(storeImageView, categoryImageViewProgressBar).execute(storeMainImageUrl);
             imageDownloader.download(storeMainImageUrl, storeImageView);
         }
 
