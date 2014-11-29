@@ -3,18 +3,17 @@ package com.geekylab.menu.geekymenutest;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
-
+import android.app.Activity;
 import android.app.LoaderManager.LoaderCallbacks;
-import android.content.ContentResolver;
 import android.content.CursorLoader;
 import android.content.Loader;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
-
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.ContactsContract;
+import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -27,11 +26,22 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import com.google.android.gms.auth.GoogleAuthException;
+import com.google.android.gms.auth.GoogleAuthUtil;
+import com.google.android.gms.auth.UserRecoverableAuthException;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
+import com.google.android.gms.common.Scopes;
 import com.google.android.gms.common.SignInButton;
-import com.google.android.gms.plus.PlusClient;
+import com.google.android.gms.common.api.CommonStatusCodes;
+import com.google.android.gms.common.api.ResultCallback;
+import com.google.android.gms.internal.cu;
+import com.google.android.gms.plus.People;
+import com.google.android.gms.plus.Plus;
+import com.google.android.gms.plus.model.people.Person;
+import com.google.android.gms.plus.model.people.PersonBuffer;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -44,7 +54,7 @@ import java.util.List;
  * https://developers.google.com/+/mobile/android/getting-started#step_1_enable_the_google_api
  * and follow the steps in "Step 1" to create an OAuth 2.0 client for your package.
  */
-public class LoginActivity extends PlusBaseActivity implements LoaderCallbacks<Cursor> {
+public class LoginActivity extends PlusBaseActivity implements LoaderCallbacks<Cursor>, ResultCallback<People.LoadPeopleResult> {
 
     /**
      * A dummy authentication store containing known user names and passwords.
@@ -227,8 +237,24 @@ public class LoginActivity extends PlusBaseActivity implements LoaderCallbacks<C
     @Override
     protected void onPlusClientSignIn() {
         //Set up sign out and disconnect buttons.
-        PlusClient plusClient = getPlusClient();
-        Log.d(TAG, plusClient.getAccountName());
+        Person currentUser = Plus.PeopleApi.getCurrentPerson(getPlusClient());
+//        String accountName = Plus.AccountApi.getAccountName(getPlusClient());
+
+
+        if (currentUser != null) {
+
+            String android_id = android.provider.Settings.Secure.getString(
+                    getContentResolver(),
+                    android.provider.Settings.Secure.ANDROID_ID
+            );
+
+
+            Log.d(TAG, android_id);
+            ((TextView) findViewById(R.id.displayName)).setText(currentUser.getDisplayName());
+        }
+//        currentUser.getAgeRange();
+
+
         Button signOutButton = (Button) findViewById(R.id.plus_sign_out_button);
         signOutButton.setOnClickListener(new OnClickListener() {
             @Override
@@ -314,6 +340,24 @@ public class LoginActivity extends PlusBaseActivity implements LoaderCallbacks<C
     @Override
     public void onLoaderReset(Loader<Cursor> cursorLoader) {
 
+    }
+
+    @Override
+    public void onResult(People.LoadPeopleResult peopleData) {
+        if (peopleData.getStatus().getStatusCode() == CommonStatusCodes.SUCCESS) {
+            PersonBuffer personBuffer = peopleData.getPersonBuffer();
+            try {
+                int count = personBuffer.getCount();
+                for (int i = 0; i < count; i++) {
+                    Log.d(TAG, personBuffer.get(i).getDisplayName());
+                }
+            } finally {
+                personBuffer.close();
+            }
+//            mCirclesAdapter.notifyDataSetChanged();
+        } else {
+            Log.e(TAG, "Error requesting visible circles: " + peopleData.getStatus());
+        }
     }
 
     private interface ProfileQuery {

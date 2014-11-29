@@ -1,29 +1,51 @@
 package com.geekylab.menu.geekymenutest;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.content.IntentSender;
+import android.os.AsyncTask;
 import android.os.Bundle;
-
-import android.app.Activity;
 import android.util.Log;
 
+import com.google.android.gms.auth.GoogleAuthException;
+import com.google.android.gms.auth.GoogleAuthUtil;
+import com.google.android.gms.auth.UserRecoverableAuthException;
 import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.GooglePlayServicesClient;
-import com.google.android.gms.common.Scopes;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.plus.Plus;
 import com.google.android.gms.plus.PlusClient;
+import com.google.android.gms.plus.model.people.Person;
+
+import org.apache.http.HttpResponse;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.message.BasicNameValuePair;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
+import java.util.List;
 
 
 /**
  * A base class to wrap communication with the Google Play Services PlusClient.
  */
 public abstract class PlusBaseActivity extends Activity
-        implements GooglePlayServicesClient.ConnectionCallbacks,
-        GooglePlayServicesClient.OnConnectionFailedListener {
+        implements GoogleApiClient.ConnectionCallbacks,
+        GoogleApiClient.OnConnectionFailedListener {
 
     private static final String TAG = PlusBaseActivity.class.getSimpleName();
 
     // A magic number we will use to know that our sign-in error resolution activity has completed
     private static final int OUR_REQUEST_CODE = 49404;
+    private static final int REQ_SIGN_IN_REQUIRED = 55664;
 
     // A flag to stop multiple dialogues appearing for the user
     private boolean mAutoResolveOnFail;
@@ -32,12 +54,14 @@ public abstract class PlusBaseActivity extends Activity
     public boolean mPlusClientIsConnecting = false;
 
     // This is the helper object that connects to Google Play Services.
-    private PlusClient mPlusClient;
+//    private PlusClient mPlusClient;
+    private GoogleApiClient mGoogleApiClient;
 
     // The saved result from {@link #onConnectionFailed(ConnectionResult)}.  If a connection
     // attempt has been made, this is non-null.
     // If this IS null, then the connect method is still running.
     private ConnectionResult mConnectionResult;
+    private String mAccountName;
 
 
     /**
@@ -72,18 +96,20 @@ public abstract class PlusBaseActivity extends Activity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // Initialize the PlusClient connection.
-        // Scopes indicate the information about the user your application will be able to access.
-        mPlusClient =
-                new PlusClient.Builder(this, this, this).setScopes(Scopes.PLUS_LOGIN,
-                        Scopes.PLUS_ME).build();
+        mGoogleApiClient = new GoogleApiClient.Builder(this)
+                .addApi(Plus.API, Plus.PlusOptions.builder().build())
+                .addScope(Plus.SCOPE_PLUS_LOGIN)
+                .addScope(Plus.SCOPE_PLUS_PROFILE)
+                .addConnectionCallbacks(this)
+                .addOnConnectionFailedListener(this)
+                .build();
     }
 
     /**
      * Try to sign in the user.
      */
     public void signIn() {
-        if (!mPlusClient.isConnected()) {
+        if (!mGoogleApiClient.isConnected()) {
             // Show the dialog as we are now signing in.
             setProgressBarVisible(true);
             // Make sure that we will start the resolution (e.g. fire the intent and pop up a
@@ -109,18 +135,15 @@ public abstract class PlusBaseActivity extends Activity
      * {@link #onConnectionFailed(com.google.android.gms.common.ConnectionResult)}.
      */
     private void initiatePlusClientConnect() {
-        if (!mPlusClient.isConnected() && !mPlusClient.isConnecting()) {
-            mPlusClient.connect();
+        if (!mGoogleApiClient.isConnected() && !mGoogleApiClient.isConnecting()) {
+            mGoogleApiClient.connect();
         }
     }
 
-    /**
-     * Disconnect the {@link PlusClient} only if it is connected (otherwise, it can throw an error.)
-     * This will call back to {@link #onDisconnected()}.
-     */
+
     private void initiatePlusClientDisconnect() {
-        if (mPlusClient.isConnected()) {
-            mPlusClient.disconnect();
+        if (mGoogleApiClient.isConnected()) {
+            mGoogleApiClient.disconnect();
         }
     }
 
@@ -130,15 +153,9 @@ public abstract class PlusBaseActivity extends Activity
     public void signOut() {
 
         // We only want to sign out if we're connected.
-        if (mPlusClient.isConnected()) {
-            // Clear the default account in order to allow the user to potentially choose a
-            // different account from the account chooser.
-            mPlusClient.clearDefaultAccount();
-
-            // Disconnect from Google Play Services, then reconnect in order to restart the
-            // process from scratch.
+        if (mGoogleApiClient.isConnected()) {
+            Plus.AccountApi.clearDefaultAccount(mGoogleApiClient);
             initiatePlusClientDisconnect();
-
             Log.v(TAG, "Sign out successful!");
         }
 
@@ -150,19 +167,11 @@ public abstract class PlusBaseActivity extends Activity
      */
     public void revokeAccess() {
 
-        if (mPlusClient.isConnected()) {
+        if (mGoogleApiClient.isConnected()) {
             // Clear the default account as in the Sign Out.
-            mPlusClient.clearDefaultAccount();
-
-            // Revoke access to this entire application. This will call back to
-            // onAccessRevoked when it is complete, as it needs to reach the Google
-            // authentication servers to revoke all tokens.
-            mPlusClient.revokeAccessAndDisconnect(new PlusClient.OnAccessRevokedListener() {
-                public void onAccessRevoked(ConnectionResult result) {
-                    updateConnectButtonState();
-                    onPlusClientRevokeAccess();
-                }
-            });
+            Plus.AccountApi.clearDefaultAccount(mGoogleApiClient);
+            updateConnectButtonState();
+            onPlusClientRevokeAccess();
         }
 
     }
@@ -230,6 +239,8 @@ public abstract class PlusBaseActivity extends Activity
             // If we've got an error we can't resolve, we're no longer in the midst of signing
             // in, so we can stop the progress spinner.
             setProgressBarVisible(false);
+        } else if (requestCode == REQ_SIGN_IN_REQUIRED && responseCode == RESULT_OK) {
+            new RetrieveTokenTask().execute(mAccountName);
         }
     }
 
@@ -240,14 +251,16 @@ public abstract class PlusBaseActivity extends Activity
     public void onConnected(Bundle connectionHint) {
         updateConnectButtonState();
         setProgressBarVisible(false);
+        mAccountName = Plus.AccountApi.getAccountName(mGoogleApiClient);
+        new RetrieveTokenTask().execute(mAccountName);
+
+
         onPlusClientSignIn();
     }
 
-    /**
-     * Successfully disconnected (called by PlusClient)
-     */
+
     @Override
-    public void onDisconnected() {
+    public void onConnectionSuspended(int i) {
         updateConnectButtonState();
         onPlusClientSignOut();
     }
@@ -276,8 +289,87 @@ public abstract class PlusBaseActivity extends Activity
         }
     }
 
-    public PlusClient getPlusClient() {
-        return mPlusClient;
+    public GoogleApiClient getPlusClient() {
+        return mGoogleApiClient;
     }
 
+    private class RetrieveTokenTask extends AsyncTask<String, Void, String> {
+
+        @Override
+        protected String doInBackground(String... params) {
+            String accountName = params[0];
+            String scopes = "oauth2:profile email";
+            String token = null;
+            try {
+                token = GoogleAuthUtil.getToken(getApplicationContext(), accountName, scopes);
+
+                HttpClient httpClient = new DefaultHttpClient();
+                HttpPost httpPost = new HttpPost("http://192.168.111.103:8080/auth/google-token");
+                BasicNameValuePair access_token = new BasicNameValuePair("access_token", token);
+                List<NameValuePair> nameValuePairList = new ArrayList<NameValuePair>();
+                nameValuePairList.add(access_token);
+                try {
+                    // UrlEncodedFormEntity is an entity composed of a list of url-encoded pairs.
+                    //This is typically useful while sending an HTTP POST request.
+                    UrlEncodedFormEntity urlEncodedFormEntity = new UrlEncodedFormEntity(nameValuePairList);
+
+                    // setEntity() hands the entity (here it is urlEncodedFormEntity) to the request.
+                    httpPost.setEntity(urlEncodedFormEntity);
+
+                    try {
+                        // HttpResponse is an interface just like HttpPost.
+                        //Therefore we can't initialize them
+                        HttpResponse httpResponse = httpClient.execute(httpPost);
+
+                        // According to the JAVA API, InputStream constructor do nothing.
+                        //So we can't initialize InputStream although it is not an interface
+                        InputStream inputStream = httpResponse.getEntity().getContent();
+
+                        InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
+
+                        BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+
+                        StringBuilder stringBuilder = new StringBuilder();
+
+                        String bufferedStrChunk = null;
+
+                        while ((bufferedStrChunk = bufferedReader.readLine()) != null) {
+                            stringBuilder.append(bufferedStrChunk);
+                        }
+
+                        Log.d(TAG, stringBuilder.toString());
+
+                    } catch (ClientProtocolException cpe) {
+                        Log.d(TAG, "First Exception caz of HttpResponese :" + cpe);
+                        cpe.printStackTrace();
+                    } catch (IOException ioe) {
+                        Log.d(TAG, "Second Exception caz of HttpResponse :" + ioe);
+                        ioe.printStackTrace();
+                    }
+
+                } catch (UnsupportedEncodingException uee) {
+                    Log.d(TAG, "An Exception given because of UrlEncodedFormEntity argument :" + uee);
+                    uee.printStackTrace();
+                }
+
+            } catch (IOException e) {
+                Log.e(TAG, e.getMessage());
+            } catch (UserRecoverableAuthException e) {
+                startActivityForResult(e.getIntent(), REQ_SIGN_IN_REQUIRED);
+            } catch (GoogleAuthException e) {
+                Log.e(TAG, e.getMessage());
+            }
+            return token;
+        }
+
+        @Override
+        protected void onPostExecute(String s) {
+            super.onPostExecute(s);
+
+            //access_token
+
+            Log.d(TAG, "TOKEN" + s);
+        }
+
+    }
 }
