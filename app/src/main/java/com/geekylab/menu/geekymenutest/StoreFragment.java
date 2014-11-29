@@ -86,19 +86,27 @@ public class StoreFragment extends Fragment implements IFTaskCallback {
             try {
                 Log.d(TAG, jsonObject.toString());
                 status = jsonObject.getBoolean("status");
-                if (status) {
+                if (status && jsonObject.has("data")) {
                     JSONObject storeData = jsonObject.getJSONObject("data");
                     StoreEntity storeEntity = new StoreEntity();
-                    storeEntity.setId(storeData.getString("_id"));
-                    storeEntity.setStoreName(storeData.getString("store_name"));
-                    storeEntity.setDescription(storeData.getString("desc"));
 
-                    JSONArray imagesArray = storeData.getJSONArray("images");
-                    ArrayList<String> imagesUrls = new ArrayList<String>();
-                    for (int j = 0; j < imagesArray.length(); j++) {
-                        imagesUrls.add(Params.OPEN_API_IMAGE_URL + "/" + imagesArray.get(j).toString());
+                    if (storeData.has("_id"))
+                        storeEntity.setId(storeData.getString("_id"));
+
+                    if (storeData.has("store_name"))
+                        storeEntity.setStoreName(storeData.getString("store_name"));
+
+                    if (storeData.has("desc"))
+                        storeEntity.setDescription(storeData.getString("desc"));
+
+                    if (storeData.has("images")) {
+                        JSONArray imagesArray = storeData.getJSONArray("images");
+                        ArrayList<String> imagesUrls = new ArrayList<String>();
+                        for (int j = 0; j < imagesArray.length(); j++) {
+                            imagesUrls.add(Params.OPEN_API_IMAGE_URL + "/" + imagesArray.get(j).toString());
+                        }
+                        storeEntity.setImages(imagesUrls);
                     }
-                    storeEntity.setImages(imagesUrls);
 
                     setUpView(storeEntity);
                 } else {

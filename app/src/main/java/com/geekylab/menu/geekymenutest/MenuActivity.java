@@ -17,11 +17,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.geekylab.menu.geekymenutest.db.entity.StoreEntity;
-
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.util.Locale;
 
 
@@ -32,7 +27,7 @@ public class MenuActivity extends Activity implements
 {
 
     private static final String TAG = "MenuActivity";
-    private static final String DUMMY_STORE_ID = "547881eddc760d1200f02b7e";
+    private static final String DUMMY_STORE_ID = "5479d169c6a7bd1300dbf85c";
 
     /**
      * The {@link android.support.v4.view.PagerAdapter} that will provide

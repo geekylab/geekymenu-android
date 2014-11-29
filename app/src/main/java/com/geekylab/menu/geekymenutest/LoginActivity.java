@@ -16,6 +16,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -29,6 +30,7 @@ import android.widget.TextView;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.common.SignInButton;
+import com.google.android.gms.plus.PlusClient;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -51,6 +53,7 @@ public class LoginActivity extends PlusBaseActivity implements LoaderCallbacks<C
     private static final String[] DUMMY_CREDENTIALS = new String[]{
             "foo@example.com:hello", "bar@example.com:world"
     };
+    private static final String TAG = "LoginActivity";
     /**
      * Keep track of the login task to ensure we can cancel it if requested.
      */
@@ -224,6 +227,8 @@ public class LoginActivity extends PlusBaseActivity implements LoaderCallbacks<C
     @Override
     protected void onPlusClientSignIn() {
         //Set up sign out and disconnect buttons.
+        PlusClient plusClient = getPlusClient();
+        Log.d(TAG, plusClient.getAccountName());
         Button signOutButton = (Button) findViewById(R.id.plus_sign_out_button);
         signOutButton.setOnClickListener(new OnClickListener() {
             @Override
