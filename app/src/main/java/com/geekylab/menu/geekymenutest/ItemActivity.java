@@ -19,6 +19,7 @@ import com.geekylab.menu.geekymenutest.db.entity.ItemEntity;
 import com.geekylab.menu.geekymenutest.db.entity.ItemImageEntity;
 import com.geekylab.menu.geekymenutest.network.DownloadJsonAsyncTaskHelper;
 import com.geekylab.menu.geekymenutest.network.IFTaskCallback;
+import com.geekylab.menu.geekymenutest.openapi.Params;
 
 import org.apache.http.NameValuePair;
 import org.apache.http.client.methods.HttpPost;
@@ -35,8 +36,6 @@ public class ItemActivity extends Activity implements IFTaskCallback, AbsListVie
     private static final String ARG_CURRENT_STORE_ID = "current_store_id";
     private static final String ARG_CURRENT_CATEGORY_ID = "current_category_id";
     private static final String TAG = "ItemActivity";
-    private static final String OPEN_API_IMAGES = "http://192.168.111.103:8080/open-api/image";
-    private final String OPEN_API_ITEM = "http://192.168.111.103:8080/open-api/item";
     private ArrayList<ItemEntity> m_parts = new ArrayList<ItemEntity>();
     private ListView listView;
     private ItemAdapter mListAdapter;
@@ -54,7 +53,7 @@ public class ItemActivity extends Activity implements IFTaskCallback, AbsListVie
         Log.d(TAG, mStoreId);
         Log.d(TAG, mCategoryId);
 
-        String url = OPEN_API_ITEM + "/" + mStoreId + "?l=" + defaultLanguage;
+        String url = Params.OPEN_API_ITEM_URL + "/" + mStoreId + "?l=" + defaultLanguage;
         ArrayList<NameValuePair> postParameters = new ArrayList<NameValuePair>();
         postParameters.add(new BasicNameValuePair("category_id", mCategoryId));
         new DownloadJsonAsyncTaskHelper(this, this, HttpPost.METHOD_NAME, postParameters)
@@ -110,7 +109,7 @@ public class ItemActivity extends Activity implements IFTaskCallback, AbsListVie
                             JSONObject imageObj = imagesArray.getJSONObject(j);
                             ItemImageEntity imageEntity = new ItemImageEntity();
                             if (imageObj.has("image")) {
-                                imageEntity.setUrl(OPEN_API_IMAGES + "/" + imageObj.getString("image"));
+                                imageEntity.setUrl(Params.OPEN_API_IMAGE_URL + "/" + imageObj.getString("image"));
                                 imageEntity.setId(imageObj.getString("image"));
                                 if (imageObj.has("filename"))
                                     imageEntity.setName(imageObj.getString("filename"));

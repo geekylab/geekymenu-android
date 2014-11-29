@@ -8,13 +8,11 @@ import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.Toast;
 
-import com.geekylab.menu.geekymenutest.adapters.GlobalCategoryAdapter;
 import com.geekylab.menu.geekymenutest.adapters.StoreCategoryAdapter;
-import com.geekylab.menu.geekymenutest.db.entity.GlobalCategoryEntity;
 import com.geekylab.menu.geekymenutest.db.entity.StoreCategoryEntity;
-import com.geekylab.menu.geekymenutest.db.entity.StoreEntity;
 import com.geekylab.menu.geekymenutest.network.DownloadJsonAsyncTaskHelper;
 import com.geekylab.menu.geekymenutest.network.IFTaskCallback;
+import com.geekylab.menu.geekymenutest.openapi.Params;
 import com.geekylab.menu.geekymenutest.utils.NetworkUtil;
 
 import org.apache.http.client.methods.HttpPost;
@@ -33,7 +31,6 @@ public class StoreCategoryListFragment extends AbstractBaseListFragment implemen
     private static final String TAG = "StoreCategoryListFragment";
     private static final String ARG_CURRENT_STORE_ID = "current_store_id";
     private static final String ARG_CURRENT_CATEGORY_ID = "current_category_id";
-    private final String OPEN_API_CATEGORY = "http://192.168.111.103:8080/open-api/category";
     private final String defaultLanguage;
     private ArrayList<StoreCategoryEntity> m_parts = new ArrayList<StoreCategoryEntity>();
     private static final String ARG_SECTION_NUMBER = "section_number";
@@ -74,7 +71,7 @@ public class StoreCategoryListFragment extends AbstractBaseListFragment implemen
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         if (NetworkUtil.netWorkCheck(getActivity())) {
-            String url = OPEN_API_CATEGORY + "/" + mStoreID + "?l=" + defaultLanguage;
+            String url = Params.OPEN_API_CATEGORY_URL + "/" + mStoreID + "?l=" + defaultLanguage;
             Log.d(TAG, url);
             new DownloadJsonAsyncTaskHelper(getActivity(), this, HttpPost.METHOD_NAME).execute(url);
         } else {

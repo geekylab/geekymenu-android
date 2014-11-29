@@ -14,6 +14,7 @@ import com.geekylab.menu.geekymenutest.db.entity.StoreEntity;
 import com.geekylab.menu.geekymenutest.network.DownloadJsonAsyncTaskHelper;
 import com.geekylab.menu.geekymenutest.network.IFTaskCallback;
 import com.geekylab.menu.geekymenutest.network.ImageDownloader;
+import com.geekylab.menu.geekymenutest.openapi.Params;
 
 import org.apache.http.client.methods.HttpPost;
 import org.json.JSONArray;
@@ -28,9 +29,6 @@ import java.util.Locale;
  * A simple {@link Fragment} subclass.
  */
 public class StoreFragment extends Fragment implements IFTaskCallback {
-
-    private static final String OPEN_API_STORE_URL = "http://192.168.111.103:8080/open-api/store";
-    private static final String OPEN_API_IMAGES = "http://192.168.111.103:8080/open-api/image";
     private static final String ARG_SECTION_NUMBER = "section_number";
     private static final String ARG_CURRENT_STORE_ID = "current_store_id";
     private static final String TAG = "StoreFragment";
@@ -73,8 +71,7 @@ public class StoreFragment extends Fragment implements IFTaskCallback {
 
         inflate = inflater.inflate(R.layout.fragment_store, container, false);
 
-        String url = OPEN_API_STORE_URL + "/" + mStoreID + "?l=" + defaultLanguage;
-        Log.d(TAG, "store request url : " + url);
+        String url = Params.OPEN_API_STORE_URL + "/" + mStoreID + "?l=" + defaultLanguage;
         new DownloadJsonAsyncTaskHelper(getActivity(), this, HttpPost.METHOD_NAME).execute(url);
 
         return inflate;
@@ -99,7 +96,7 @@ public class StoreFragment extends Fragment implements IFTaskCallback {
                     JSONArray imagesArray = storeData.getJSONArray("images");
                     ArrayList<String> imagesUrls = new ArrayList<String>();
                     for (int j = 0; j < imagesArray.length(); j++) {
-                        imagesUrls.add(OPEN_API_IMAGES + "/" + imagesArray.get(j).toString());
+                        imagesUrls.add(Params.OPEN_API_IMAGE_URL + "/" + imagesArray.get(j).toString());
                     }
                     storeEntity.setImages(imagesUrls);
 
