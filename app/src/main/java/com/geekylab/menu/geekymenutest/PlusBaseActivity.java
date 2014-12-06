@@ -1,10 +1,13 @@
 package com.geekylab.menu.geekymenutest;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.util.Log;
 
 import com.google.android.gms.auth.GoogleAuthException;
@@ -24,6 +27,8 @@ import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -300,9 +305,9 @@ public abstract class PlusBaseActivity extends Activity
             String accountName = params[0];
             String scopes = "oauth2:profile email";
             String token = null;
+            String profile_raw_json = null;
             try {
                 token = GoogleAuthUtil.getToken(getApplicationContext(), accountName, scopes);
-
                 HttpClient httpClient = new DefaultHttpClient();
                 HttpPost httpPost = new HttpPost("http://192.168.111.103:8080/auth/google-token");
                 BasicNameValuePair access_token = new BasicNameValuePair("access_token", token);
@@ -337,8 +342,7 @@ public abstract class PlusBaseActivity extends Activity
                             stringBuilder.append(bufferedStrChunk);
                         }
 
-                        Log.d(TAG, stringBuilder.toString());
-
+                        profile_raw_json = stringBuilder.toString();
                     } catch (ClientProtocolException cpe) {
                         Log.d(TAG, "First Exception caz of HttpResponese :" + cpe);
                         cpe.printStackTrace();
@@ -359,7 +363,7 @@ public abstract class PlusBaseActivity extends Activity
             } catch (GoogleAuthException e) {
                 Log.e(TAG, e.getMessage());
             }
-            return token;
+            return profile_raw_json;
         }
 
         @Override
@@ -367,8 +371,27 @@ public abstract class PlusBaseActivity extends Activity
             super.onPostExecute(s);
 
             //access_token
+            if (s != null) {
+                try {
+                    JSONObject profileJsonObject = new JSONObject(s);
+                    if (profileJsonObject.has("status") && profileJsonObject.getBoolean("status")) {
+                        //ok
+                        if (profileJsonObject.has("profile")) {
+                            JSONObject profile = profileJsonObject.getJSONObject("profile");
+                            Log.d(TAG, profile.toString());
 
-            Log.d(TAG, "TOKEN" + s);
+                            SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(PlusBaseActivity.this);
+                            SharedPreferences.Editor editor = prefs.edit();
+                            editor.putString("service_token", profile.getString("service_token"));
+                            editor.putString("display_name", profile.getString("display_name"));
+                            editor.putString("image_url", profile.getString("image_url"));
+                            editor.apply();
+                        }
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
         }
 
     }

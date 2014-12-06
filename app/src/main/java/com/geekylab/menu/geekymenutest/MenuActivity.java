@@ -6,7 +6,9 @@ import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v13.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
@@ -16,6 +18,10 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+
+import com.crashlytics.android.Crashlytics;
+
+import io.fabric.sdk.android.Fabric;
 
 import java.util.Locale;
 
@@ -27,7 +33,7 @@ public class MenuActivity extends Activity implements
 {
 
     private static final String TAG = "MenuActivity";
-    private static final String DUMMY_STORE_ID = "5479d169c6a7bd1300dbf85c";
+    private static final String DUMMY_STORE_ID = "5483372ae42da216004cad78";
 
     /**
      * The {@link android.support.v4.view.PagerAdapter} that will provide
@@ -47,6 +53,7 @@ public class MenuActivity extends Activity implements
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Fabric.with(this, new Crashlytics());
         setContentView(R.layout.activity_menu);
 
         // Set up the action bar.
@@ -78,10 +85,16 @@ public class MenuActivity extends Activity implements
             // the TabListener interface, as the callback (listener) for when
             // this tab is selected.
             actionBar.addTab(
-                    actionBar.newTab()
+                    actionBar
+                            .newTab()
                             .setText(mSectionsPagerAdapter.getPageTitle(i))
                             .setTabListener(this));
         }
+
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(MenuActivity.this);
+        String display_name = prefs.getString("display_name", "");
+        Log.d(TAG, "display_name : " + display_name);
+
     }
 
 
