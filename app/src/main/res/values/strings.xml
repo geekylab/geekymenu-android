@@ -31,5 +31,6 @@
     <string name="hello_world">Hello world!</string>
     <string name="action_login">Login</string>
     <string name="title_activity_item">ItemActivity</string>
+    <string name="title_activity_item_detail">ItemDetailActivity</string>
 
 </resources>

@@ -50,7 +50,15 @@
             android:name="com.geekylab.menu.geekymenutest.ItemActivity"
             android:label="@string/title_activity_item" >
         </activity>
-        <meta-data android:name="com.crashlytics.ApiKey" android:value="4d144cd694be62eaeba10aa088ac9b4a12425cbd"/>
+
+        <meta-data
+            android:name="com.crashlytics.ApiKey"
+            android:value="4d144cd694be62eaeba10aa088ac9b4a12425cbd" />
+
+        <activity
+            android:name="com.geekylab.menu.geekymenutest.ItemDetailActivity"
+            android:label="@string/title_activity_item_detail" >
+        </activity>
     </application>
 
 </manifest>

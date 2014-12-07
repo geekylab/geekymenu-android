@@ -33,7 +33,7 @@ public class MenuActivity extends Activity implements
 {
 
     private static final String TAG = "MenuActivity";
-    private static final String DUMMY_STORE_ID = "5483372ae42da216004cad78";
+    private static final String DUMMY_STORE_ID = "54849357e55df80f00042c64";
 
     /**
      * The {@link android.support.v4.view.PagerAdapter} that will provide

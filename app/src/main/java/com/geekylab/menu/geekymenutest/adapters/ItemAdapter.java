@@ -1,37 +1,53 @@
 package com.geekylab.menu.geekymenutest.adapters;
 
 import android.content.Context;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.geekylab.menu.geekymenutest.R;
 import com.geekylab.menu.geekymenutest.db.entity.ItemEntity;
 import com.geekylab.menu.geekymenutest.db.entity.ItemImageEntity;
-import com.geekylab.menu.geekymenutest.db.entity.StoreCategoryEntity;
 import com.geekylab.menu.geekymenutest.network.ImageDownloader;
 
+import java.text.NumberFormat;
 import java.util.ArrayList;
+import java.util.Locale;
 
 /**
  * Created by johna on 25/11/14.
+ * Geekylab
  */
 public class ItemAdapter extends ArrayAdapter<ItemEntity> {
     private static final String TAG = "GlobalCategoryAdapter";
     private final int resource;
     private final ArrayList<ItemEntity> objects;
     private final ImageDownloader imageDownloader = new ImageDownloader();
+    private final NumberFormat currencyInstance;
+    private final OnItemOrderListener mListener;
 
 
     public ItemAdapter(Context context, int resource, ArrayList<ItemEntity> objects) {
         super(context, resource, objects);
         this.objects = objects;
         this.resource = resource;
+        Locale ptBr = new Locale("pt", "BR");
+        currencyInstance = NumberFormat.getCurrencyInstance(ptBr);
         imageDownloader.setMode(ImageDownloader.Mode.NO_DOWNLOADED_DRAWABLE);
+
+
+        try {
+            mListener = (OnItemOrderListener) context;
+        } catch (ClassCastException e) {
+            throw new ClassCastException(context.toString()
+                    + " must implement OnItemOrderListener");
+        }
+
+
     }
 
     @Override
@@ -48,28 +64,44 @@ public class ItemAdapter extends ArrayAdapter<ItemEntity> {
 
         ItemEntity i = objects.get(position);
 
-        String categoryName = i.getName();
+        String itemName = i.getName();
         ArrayList<ItemImageEntity> imageUrls = i.getImageUrls();
-        String categoryImageUrl = null;
+        String itemImageUrl = null;
         if (imageUrls.size() > 0) {
-            categoryImageUrl = imageUrls.get(0).getUrl();
+            itemImageUrl = imageUrls.get(0).getUrl();
         }
 
-        Log.d(TAG, "getView" + categoryName);
+        TextView itemNameTextView = (TextView) v.findViewById(R.id.itemName);
+        TextView itemPriceTextView = (TextView) v.findViewById(R.id.itemPrice);
+        ImageView itemImageView = (ImageView) v.findViewById(R.id.imageView);
+        Button orderButton = (Button) v.findViewById(R.id.orderButton);
+        orderButton.setTag(i);
 
-        TextView categoryNameTextView = (TextView) v.findViewById(R.id.categoryName);
-        ImageView categoryImageView = (ImageView) v.findViewById(R.id.imageView);
-//        ProgressBar categoryImageViewProgressBar = (ProgressBar) v.findViewById(R.id.imageViewProgressBar);
-        categoryNameTextView.setText(categoryName);
+        orderButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mListener.onClickOrderButton((ItemEntity) v.getTag());
+            }
+        });
 
-        if (categoryImageView != null) {
-            categoryImageView.setTag(categoryImageUrl);
-            if (categoryImageUrl != null)
-                imageDownloader.download(categoryImageUrl, categoryImageView);
+
+        itemNameTextView.setText(itemName);
+        itemPriceTextView.setText(currencyInstance.format(i.getPrice()));
+
+        if (itemImageView != null) {
+            itemImageView.setTag(itemImageUrl);
+            if (itemImageUrl != null)
+                imageDownloader.download(itemImageUrl, itemImageView);
             else
-                categoryImageView.setVisibility(View.INVISIBLE);
+                itemImageView.setVisibility(View.INVISIBLE);
         }
 
         return v;
     }
+
+    public interface OnItemOrderListener {
+        public void onClickOrderButton(ItemEntity itemEntity);
+    }
+
+
 }

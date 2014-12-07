@@ -11,7 +11,7 @@ public class ItemEntity implements Serializable {
     protected String id;
     protected String name;
     protected String desc;
-    protected String price;
+    protected Double price;
     protected String time;
     private ArrayList<ItemImageEntity> imageUrls;
 
@@ -42,11 +42,11 @@ public class ItemEntity implements Serializable {
         return this;
     }
 
-    public String getPrice() {
+    public Double getPrice() {
         return price;
     }
 
-    public ItemEntity setPrice(String val) {
+    public ItemEntity setPrice(Double val) {
         this.price = val;
         return this;
     }
