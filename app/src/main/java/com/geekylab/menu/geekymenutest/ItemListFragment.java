@@ -73,6 +73,11 @@ public class ItemListFragment extends AbstractBaseListFragment implements
     }
 
     @Override
+    protected int getLayout() {
+        return R.layout.fragment_itemlist;
+    }
+
+    @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
         try {
@@ -93,9 +98,7 @@ public class ItemListFragment extends AbstractBaseListFragment implements
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         if (null != mListener) {
-            // Notify the active callbacks interface (the activity, if the
-            // fragment is attached to one) that an item has been selected.
-            mListener.onFragmentInteraction(DummyContent.ITEMS.get(position).id);
+            mListener.onFragmentInteraction(m_parts.get(position));
         }
     }
 
@@ -161,7 +164,7 @@ public class ItemListFragment extends AbstractBaseListFragment implements
     }
 
     public interface OnFragmentInteractionListener {
-        public void onFragmentInteraction(String id);
+        public void onFragmentInteraction(ItemEntity itemEntity);
     }
 
 }

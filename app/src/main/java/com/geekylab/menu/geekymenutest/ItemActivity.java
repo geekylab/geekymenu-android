@@ -32,7 +32,7 @@ public class ItemActivity extends Activity implements
     }
 
     @Override
-    public void onFragmentInteraction(String id) {
+    public void onFragmentInteraction(ItemEntity itemEntity) {
 
     }
 

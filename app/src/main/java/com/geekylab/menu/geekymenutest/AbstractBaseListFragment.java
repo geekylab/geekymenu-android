@@ -70,7 +70,8 @@ public class AbstractBaseListFragment extends Fragment implements AbsListView.On
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_baselist, container, false);
+        int layout = getLayout();
+        View view = inflater.inflate(layout, container, false);
 
         // Set the adapter
         mListView = (AbsListView) view.findViewById(android.R.id.list);
@@ -80,6 +81,10 @@ public class AbstractBaseListFragment extends Fragment implements AbsListView.On
         mListView.setOnItemClickListener(this);
 
         return view;
+    }
+
+    protected int getLayout() {
+        return R.layout.fragment_baselist;
     }
 
 
