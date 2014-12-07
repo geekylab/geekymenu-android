@@ -17,6 +17,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.TextView;
 
 import com.crashlytics.android.Crashlytics;
@@ -94,6 +95,7 @@ public class MenuActivity extends Activity implements
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(MenuActivity.this);
         String display_name = prefs.getString("display_name", "");
         Log.d(TAG, "display_name : " + display_name);
+
 
     }
 

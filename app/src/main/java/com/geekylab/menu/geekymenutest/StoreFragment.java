@@ -11,6 +11,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.geekylab.menu.geekymenutest.db.entity.StoreEntity;
+import com.geekylab.menu.geekymenutest.dialog.OnTheTableFragmentDialog;
 import com.geekylab.menu.geekymenutest.network.DownloadJsonAsyncTaskHelper;
 import com.geekylab.menu.geekymenutest.network.IFTaskCallback;
 import com.geekylab.menu.geekymenutest.network.ImageDownloader;
@@ -73,6 +74,21 @@ public class StoreFragment extends Fragment implements IFTaskCallback {
 
         String url = Params.OPEN_API_STORE_URL + "/" + mStoreID + "?l=" + defaultLanguage;
         new DownloadJsonAsyncTaskHelper(getActivity(), this, HttpPost.METHOD_NAME).execute(url);
+
+        View onTheTableButton = inflate.findViewById(R.id.imOnTheTableButton);
+
+        if (onTheTableButton != null) {
+            onTheTableButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    OnTheTableFragmentDialog onTheTableFragmentDialog = OnTheTableFragmentDialog.newInstance(mStoreID);
+                    onTheTableFragmentDialog.show(getFragmentManager(), getString(R.string.im_on_the_table));
+                }
+            });
+        } else {
+            Log.d(TAG, "Button is null");
+        }
+
 
         return inflate;
     }

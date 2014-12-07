@@ -9,5 +9,6 @@ public class Params {
     public static final String OPEN_API_STORE_URL = OPEN_API_HOST_URL + "/store";
     public static final String OPEN_API_IMAGE_URL = OPEN_API_HOST_URL + "/image";
     public static final String OPEN_API_ITEM_URL = OPEN_API_HOST_URL + "/item";
+    public static final String OPEN_API_TABLE_TOKEN = OPEN_API_HOST_URL + "/table_token";
     public static final String OPEN_API_CATEGORY_URL = OPEN_API_HOST_URL + "/category";
 }
