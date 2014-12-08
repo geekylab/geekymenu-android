@@ -81,7 +81,7 @@ public class StoreFragment extends Fragment implements IFTaskCallback {
             onTheTableButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    OnTheTableFragmentDialog onTheTableFragmentDialog = OnTheTableFragmentDialog.newInstance(mStoreID);
+                    OnTheTableFragmentDialog onTheTableFragmentDialog = OnTheTableFragmentDialog.newInstance(mStoreID, "test");
                     onTheTableFragmentDialog.show(getFragmentManager(), getString(R.string.im_on_the_table));
                 }
             });

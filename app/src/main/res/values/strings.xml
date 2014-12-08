@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">GeekyMenuTest</string>
+    <string name="app_name">(: Geeky Menu :)</string>
     <string name="store_category">Restaurant category</string>
     <string name="title_menu">Menu</string>
     <string name="title_history">History</string>
@@ -33,5 +33,11 @@
     <string name="title_activity_item">ItemActivity</string>
     <string name="title_activity_item_detail">ItemDetailActivity</string>
     <string name="im_on_the_table">I\'m on the table</string>
+    <string name="close">Close</string>
+    <string name="ok">OK</string>
+    <string name="title_activity_first">FirstActivity</string>
+    <string name="dummy_button">Dummy Button</string>
+    <string name="dummy_content">DUMMY\nCONTENT</string>
+    <string name="read_qrcode">Read QR-code</string>
 
 </resources>

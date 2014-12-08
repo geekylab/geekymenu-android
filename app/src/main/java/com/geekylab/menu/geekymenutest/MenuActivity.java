@@ -6,9 +6,8 @@ import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.content.Intent;
-import android.content.SharedPreferences;
+import android.net.Uri;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.support.v13.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
@@ -17,14 +16,14 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.TextView;
 
 import com.crashlytics.android.Crashlytics;
 
-import io.fabric.sdk.android.Fabric;
-
+import java.util.List;
 import java.util.Locale;
+
+import io.fabric.sdk.android.Fabric;
 
 
 public class MenuActivity extends Activity implements
@@ -34,7 +33,7 @@ public class MenuActivity extends Activity implements
 {
 
     private static final String TAG = "MenuActivity";
-    private static final String DUMMY_STORE_ID = "54849357e55df80f00042c64";
+    private static final int SCANNER_REQUEST_CODE = 123;
 
     /**
      * The {@link android.support.v4.view.PagerAdapter} that will provide
@@ -51,11 +50,34 @@ public class MenuActivity extends Activity implements
      */
     ViewPager mViewPager;
 
+    private String mStoreId;
+    private String mTableId;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Fabric.with(this, new Crashlytics());
         setContentView(R.layout.activity_menu);
+
+
+        Intent intent = getIntent();
+        String action = intent.getAction();
+        if (Intent.ACTION_VIEW.equals(action)) {
+            Uri uri = intent.getData();
+            if (uri != null) {
+                List<String> segments = uri.getPathSegments();
+                mStoreId = segments.get(1);
+                if (segments.size() > 2) {
+                    mTableId = segments.get(2);
+                }
+            }
+        } else {
+            if (mStoreId == null) {
+                mStoreId = intent.getStringExtra(FirstActivity.ARG_STORE_ID);
+                mTableId = intent.getStringExtra(FirstActivity.ARG_TABLE_ID);
+            }
+        }
+
 
         // Set up the action bar.
         final ActionBar actionBar = getActionBar();
@@ -92,13 +114,16 @@ public class MenuActivity extends Activity implements
                             .setTabListener(this));
         }
 
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(MenuActivity.this);
-        String display_name = prefs.getString("display_name", "");
-        Log.d(TAG, "display_name : " + display_name);
-
-
+//        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(MenuActivity.this);
+//        String display_name = prefs.getString("display_name", "");
+//        Log.d(TAG, "display_name : " + display_name);
     }
 
+    @Override
+    protected void onStart() {
+        super.onStart();
+
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -183,9 +208,9 @@ public class MenuActivity extends Activity implements
             Log.d(TAG, "" + position);
             switch (position) {
                 case 0:
-                    return StoreFragment.newInstance(position + 1, DUMMY_STORE_ID);
+                    return StoreFragment.newInstance(position + 1, mStoreId);
                 case 1:
-                    return StoreCategoryListFragment.newInstance(position + 1, DUMMY_STORE_ID);
+                    return StoreCategoryListFragment.newInstance(position + 1, mStoreId);
                 default:
                     return HistoryFragment.newInstance(position + 1);
             }

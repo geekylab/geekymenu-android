@@ -39,7 +39,9 @@ import java.util.ArrayList;
 public class OnTheTableFragmentDialog extends DialogFragment implements IFTaskCallback {
     private static final String TAG = OnTheTableFragmentDialog.class.getSimpleName();
     private static final String ARG_STORE_ID = "store_id";
+    private static final String ARG_TABLE_ID = "table_id";
     private String mStoreID;
+    private String mTableID;
     private Activity activity;
 
 
@@ -49,10 +51,11 @@ public class OnTheTableFragmentDialog extends DialogFragment implements IFTaskCa
      *
      * @return A new instance of fragment OnTheTableFragmentDialog.
      */
-    public static OnTheTableFragmentDialog newInstance(String store_id) {
+    public static OnTheTableFragmentDialog newInstance(String store_id, String table_id) {
         OnTheTableFragmentDialog fragment = new OnTheTableFragmentDialog();
         Bundle args = new Bundle();
         args.putString(ARG_STORE_ID, store_id);
+        args.putString(ARG_TABLE_ID, table_id);
         fragment.setArguments(args);
         return fragment;
     }
@@ -67,6 +70,7 @@ public class OnTheTableFragmentDialog extends DialogFragment implements IFTaskCa
 
         if (getArguments() != null) {
             mStoreID = getArguments().getString(ARG_STORE_ID);
+            mTableID = getArguments().getString(ARG_TABLE_ID);
         }
 
 
@@ -83,19 +87,19 @@ public class OnTheTableFragmentDialog extends DialogFragment implements IFTaskCa
 
         builder.setView(content);
 
-        builder.setMessage("設定")
-                .setNegativeButton("閉じる", new DialogInterface.OnClickListener() {
+        builder.setMessage(getString(R.string.im_on_the_table))
+                .setNegativeButton(getString(R.string.close), new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
                         // User cancelled the dialog
                     }
                 })
-                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                .setPositiveButton(getString(R.string.ok), new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int id) {
-                        Log.d(TAG, tableTokenEditText.getText().toString());
                         String url = Params.OPEN_API_TABLE_TOKEN + "/" + mStoreID;
                         ArrayList<NameValuePair> postParameters = new ArrayList<NameValuePair>();
                         postParameters.add(new BasicNameValuePair("table_token", tableTokenEditText.getText().toString()));
+                        postParameters.add(new BasicNameValuePair("table_id", mTableID));
                         postParameters.add(new BasicNameValuePair("service_token", service_token));
                         new DownloadJsonAsyncTaskHelper(getActivity(), OnTheTableFragmentDialog.this, HttpPost.METHOD_NAME, postParameters)
                                 .execute(url);
