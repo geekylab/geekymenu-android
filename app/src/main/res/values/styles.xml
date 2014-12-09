@@ -2,11 +2,11 @@
 <resources>
 
     <!-- Base application theme. -->
-    <style name="AppTheme" parent="android:Theme.Holo.Light">
+    <style name="AppTheme" parent="Theme.AppCompat.Light">
         <!-- Customize your theme here. -->
     </style>
 
-    <style name="AppTheme.RestaurantTitle">
+    <style name="AppTheme.RestaurantTitle" parent="Theme.AppCompat.Light">
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">wrap_content</item>
         <item name="android:background">@drawable/rounded_corner</item>
@@ -15,8 +15,6 @@
         <item name="android:typeface">monospace</item>
         <item name="android:textSize">30sp</item>
     </style>
-
-    <style name="AppTheme.darkgray"></style>
 
     <style name="FullscreenTheme" parent="android:Theme.NoTitleBar">
         <item name="android:windowContentOverlay">@null</item>

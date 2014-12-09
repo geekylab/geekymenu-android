@@ -1,15 +1,16 @@
 package com.geekylab.menu.geekymenutest;
 
-import android.app.ActionBar;
-import android.app.Activity;
+
 import android.app.Fragment;
 import android.app.FragmentManager;
-import android.app.FragmentTransaction;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v13.app.FragmentPagerAdapter;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.ViewPager;
+import android.support.v7.app.ActionBarActivity;
+import android.support.v7.app.ActionBar;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -26,27 +27,14 @@ import java.util.Locale;
 import io.fabric.sdk.android.Fabric;
 
 
-public class MenuActivity extends Activity implements
+public class MenuActivity extends ActionBarActivity implements
         ActionBar.TabListener,
         AbstractBaseListFragment.OnFragmentInteractionListener
 
 {
 
     private static final String TAG = "MenuActivity";
-
-    /**
-     * The {@link android.support.v4.view.PagerAdapter} that will provide
-     * fragments for each of the sections. We use a
-     * {@link FragmentPagerAdapter} derivative, which will keep every
-     * loaded fragment in memory. If this becomes too memory intensive, it
-     * may be best to switch to a
-     * {@link android.support.v13.app.FragmentStatePagerAdapter}.
-     */
     SectionsPagerAdapter mSectionsPagerAdapter;
-
-    /**
-     * The {@link ViewPager} that will host the section contents.
-     */
     ViewPager mViewPager;
 
     private String mStoreId;
@@ -79,7 +67,7 @@ public class MenuActivity extends Activity implements
 
 
         // Set up the action bar.
-        final ActionBar actionBar = getActionBar();
+        final ActionBar actionBar = getSupportActionBar();
         actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
 
         // Create the adapter that will return a fragment for each of the three
@@ -156,7 +144,7 @@ public class MenuActivity extends Activity implements
         // When the given tab is selected, switch to the corresponding page in
         // the ViewPager.
         Locale l = Locale.getDefault();
-        ActionBar actionBar = getActionBar();
+        ActionBar actionBar = getSupportActionBar();
         String mTitle = "";
         switch (tab.getPosition()) {
             case 0:

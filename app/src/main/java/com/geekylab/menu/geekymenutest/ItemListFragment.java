@@ -2,7 +2,11 @@ package com.geekylab.menu.geekymenutest;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.os.Handler;
+import android.support.v4.widget.SwipeRefreshLayout;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
@@ -72,10 +76,10 @@ public class ItemListFragment extends AbstractBaseListFragment implements
         return new ItemAdapter(getActivity(), R.layout.item_list_row, m_parts);
     }
 
-    @Override
-    protected int getLayout() {
-        return R.layout.fragment_itemlist;
-    }
+//    @Override
+//    protected int getLayout() {
+//        return R.layout.fragment_itemlist;
+//    }
 
     @Override
     public void onAttach(Activity activity) {

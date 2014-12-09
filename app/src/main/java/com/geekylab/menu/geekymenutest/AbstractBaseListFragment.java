@@ -2,6 +2,8 @@ package com.geekylab.menu.geekymenutest;
 
 import android.app.Fragment;
 import android.os.Bundle;
+import android.os.Handler;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -27,6 +29,7 @@ public class AbstractBaseListFragment extends Fragment implements AbsListView.On
 
     private static final String ARG_SECTION_NUMBER = "section_number";
     private static final String TAG = "DashboardFragment";
+    private SwipeRefreshLayout mSwipeRefreshLayout;
 
     protected OnFragmentInteractionListener mListener;
 
@@ -78,6 +81,15 @@ public class AbstractBaseListFragment extends Fragment implements AbsListView.On
         // Set OnItemClickListener so we can be notified on item clicks
         mListView.setOnItemClickListener(this);
 
+        // SwipeRefreshLayoutの設定
+        View SwipeRefreshLayout = view.findViewById(R.id.refresh);
+        if (SwipeRefreshLayout != null) {
+            mSwipeRefreshLayout = (SwipeRefreshLayout) SwipeRefreshLayout;
+            mSwipeRefreshLayout.setOnRefreshListener(mOnRefreshListener);
+            mSwipeRefreshLayout.setColorScheme(R.color.red, R.color.green, R.color.blue, R.color.yellow);
+        }
+
+
         return view;
     }
 
@@ -119,5 +131,18 @@ public class AbstractBaseListFragment extends Fragment implements AbsListView.On
     public interface OnFragmentInteractionListener {
         public void onFragmentInteraction(int position);
     }
+
+    private SwipeRefreshLayout.OnRefreshListener mOnRefreshListener = new SwipeRefreshLayout.OnRefreshListener() {
+        @Override
+        public void onRefresh() {
+            // 3秒待機
+            new Handler().postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    mSwipeRefreshLayout.setRefreshing(false);
+                }
+            }, 3000);
+        }
+    };
 
 }
