@@ -32,18 +32,22 @@ import java.util.Locale;
 public class StoreFragment extends Fragment implements IFTaskCallback {
     private static final String ARG_SECTION_NUMBER = "section_number";
     private static final String ARG_CURRENT_STORE_ID = "current_store_id";
+    private static final String ARG_CURRENT_TABLE_ID = "current_table_id";
     private static final String TAG = "StoreFragment";
+
     private final ImageDownloader imageDownloader = new ImageDownloader();
     private final String defaultLanguage;
 
     private String mStoreID;
+    private String mTableID;
     protected View inflate;
 
-    public static StoreFragment newInstance(int sectionNumber, String storeId) {
+    public static StoreFragment newInstance(int sectionNumber, String storeId, String TableId) {
         StoreFragment fragment = new StoreFragment();
         Bundle args = new Bundle();
         args.putInt(ARG_SECTION_NUMBER, sectionNumber);
         args.putString(ARG_CURRENT_STORE_ID, storeId);
+        args.putString(ARG_CURRENT_TABLE_ID, TableId);
         fragment.setArguments(args);
         return fragment;
     }
@@ -62,6 +66,7 @@ public class StoreFragment extends Fragment implements IFTaskCallback {
 
         if (getArguments() != null) {
             mStoreID = getArguments().getString(ARG_CURRENT_STORE_ID);
+            mTableID = getArguments().getString(ARG_CURRENT_TABLE_ID);
         }
     }
 
@@ -81,7 +86,7 @@ public class StoreFragment extends Fragment implements IFTaskCallback {
             onTheTableButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    OnTheTableFragmentDialog onTheTableFragmentDialog = OnTheTableFragmentDialog.newInstance(mStoreID, "test");
+                    OnTheTableFragmentDialog onTheTableFragmentDialog = OnTheTableFragmentDialog.newInstance(mStoreID, mTableID);
                     onTheTableFragmentDialog.show(getFragmentManager(), getString(R.string.im_on_the_table));
                 }
             });

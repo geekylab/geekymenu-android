@@ -5,13 +5,15 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
+import com.geekylab.menu.geekymenutest.db.table.OrderTable;
+
 /**
  * Created by johna on 26/11/14.
  * Kodokux System
  */
 public class MySQLiteOpenHelper extends SQLiteOpenHelper {
 
-    public static final String DB = "geekymenu.db";
+    public static final String DB = "geekymenu1.db";
     public static final int DB_VERSION = 2;
     private static final String TAG = "MySQLiteOpenHelper";
 
@@ -44,11 +46,11 @@ public class MySQLiteOpenHelper extends SQLiteOpenHelper {
 
     private String getOrderTableSql() {
         return "create table user_order (" +
-                "_id INTEGER primary key autoincrement, " +
-                "store_id TEXT not null, " +
-                "order_token TEXT not null, " +
-                "table_token INTEGER DEFAULT 0, " +
-                "status INTEGER DEFAULT 0, " +
+                OrderTable.COL_ID + " INTEGER primary key autoincrement, " +
+                OrderTable.COL_STORE_ID + " TEXT not null, " +
+                OrderTable.COL_ORDER_TOKEN + " TEXT not null, " +
+                OrderTable.COL_TABLE_TOKEN + " INTEGER DEFAULT 0, " +
+                OrderTable.COL_STATUS + " INTEGER DEFAULT 0, " +
                 "created_at DATETIME DEFAULT CURRENT_TIMESTAMP " +
                 ");";
     }

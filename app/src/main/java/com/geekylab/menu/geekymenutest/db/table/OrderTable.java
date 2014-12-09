@@ -11,11 +11,13 @@ import com.geekylab.menu.geekymenutest.db.MySQLiteOpenHelper;
  * Kodokux System
  */
 public class OrderTable extends MySQLiteOpenHelper {
+
     protected String TABLE_NAME = "user_order";
     public static final String COL_ID = "_id";
     public static final String COL_STORE_ID = "store_id";
     public static final String COL_ORDER_TOKEN = "order_token";
     public static final String COL_TABLE_TOKEN = "table_token";
+    public static final String COL_ORDER_NUMBER = "order_number";
     public static final String COL_STATUS = "status";
     public static final String COL_CREATED_AT = "created_at";
 
@@ -34,6 +36,7 @@ public class OrderTable extends MySQLiteOpenHelper {
                 new String[]{
                         COL_ID,
                         COL_STORE_ID,
+                        COL_ORDER_TOKEN,
                         COL_TABLE_TOKEN,
                         COL_STATUS,
                         COL_CREATED_AT

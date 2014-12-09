@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">(: Geeky Menu :)</string>
+    <string name="app_name">Geeky Menu</string>
     <string name="store_category">Restaurant category</string>
     <string name="title_menu">Menu</string>
     <string name="title_history">History</string>

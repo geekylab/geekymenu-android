@@ -16,6 +16,7 @@ import java.util.ArrayList;
 
 /**
  * Created by johna on 25/11/14.
+ *
  */
 public class DownloadJsonAsyncTaskHelper extends AsyncTask<String, Integer, JSONObject>
         implements DialogInterface.OnCancelListener {

@@ -33,7 +33,6 @@ public class MenuActivity extends Activity implements
 {
 
     private static final String TAG = "MenuActivity";
-    private static final int SCANNER_REQUEST_CODE = 123;
 
     /**
      * The {@link android.support.v4.view.PagerAdapter} that will provide
@@ -208,13 +207,12 @@ public class MenuActivity extends Activity implements
             Log.d(TAG, "" + position);
             switch (position) {
                 case 0:
-                    return StoreFragment.newInstance(position + 1, mStoreId);
+                    return StoreFragment.newInstance(position + 1, mStoreId, mTableId);
                 case 1:
                     return StoreCategoryListFragment.newInstance(position + 1, mStoreId);
                 default:
                     return HistoryFragment.newInstance(position + 1, mStoreId);
             }
-
         }
 
         @Override

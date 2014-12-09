@@ -79,6 +79,8 @@ public class FirstActivity extends Activity implements View.OnClickListener {
                                     mTableId = pathSegments.get(2);
                                 }
 
+                                //check table
+
                                 Intent menuIntent = new Intent(FirstActivity.this, MenuActivity.class);
                                 menuIntent.putExtra(ARG_STORE_ID, mStoreId);
                                 menuIntent.putExtra(ARG_TABLE_ID, mTableId);

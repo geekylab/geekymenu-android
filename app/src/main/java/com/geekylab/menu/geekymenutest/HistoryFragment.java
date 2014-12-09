@@ -66,7 +66,7 @@ public class HistoryFragment extends ListFragment {
         OrderTable orderTable = new OrderTable(getActivity());
         Cursor orderCursor = orderTable.findByStoreId(mStoreId);
         String[] from = {
-                OrderTable.COL_STORE_ID
+                OrderTable.COL_ORDER_TOKEN
         };
 
         int[] to = {

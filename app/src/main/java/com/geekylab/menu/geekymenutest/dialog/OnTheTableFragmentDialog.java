@@ -68,6 +68,12 @@ public class OnTheTableFragmentDialog extends DialogFragment implements IFTaskCa
     }
 
     @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        activity = getActivity();
+    }
+
+    @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         CharSequence[] items = {"使い方", "よくある質問", "メール", "閉じる"};
 
@@ -104,7 +110,7 @@ public class OnTheTableFragmentDialog extends DialogFragment implements IFTaskCa
                         postParameters.add(new BasicNameValuePair("table_token", tableTokenEditText.getText().toString()));
                         postParameters.add(new BasicNameValuePair("table_id", mTableID));
                         postParameters.add(new BasicNameValuePair("service_token", service_token));
-                        new DownloadJsonAsyncTaskHelper(getActivity(), OnTheTableFragmentDialog.this, HttpPost.METHOD_NAME, postParameters)
+                        new DownloadJsonAsyncTaskHelper(activity, OnTheTableFragmentDialog.this, HttpPost.METHOD_NAME, postParameters)
                                 .execute(url);
                     }
                 });
@@ -118,18 +124,30 @@ public class OnTheTableFragmentDialog extends DialogFragment implements IFTaskCa
             try {
                 if (jsonObject.has("status") && jsonObject.getBoolean("status")) {
                     Toast.makeText(activity, "get response from cloud true", Toast.LENGTH_SHORT).show();
-//                    getActivity().deleteDatabase(MySQLiteOpenHelper.DB);
-                    OrderTable orderTable = new OrderTable(getActivity());
+                    Log.d(TAG, jsonObject.toString());
+                    if (jsonObject.has("data")) {
+                        JSONObject data = jsonObject.getJSONObject("data");
+                        if (data.getBoolean("is_new")) {
+                            JSONObject orderJsonObject = data.getJSONObject("order");
+                            //getActivity().deleteDatabase(MySQLiteOpenHelper.DB);
+                            OrderTable orderTable = new OrderTable(activity);
+                            ContentValues contentValues = new ContentValues();
+                            contentValues.put(OrderTable.COL_ORDER_TOKEN, orderJsonObject.getString("order_token"));
+                            contentValues.put(OrderTable.COL_ORDER_NUMBER, orderJsonObject.getString("order_token"));
+                            contentValues.put(OrderTable.COL_STORE_ID, mStoreID);
+                            contentValues.put(OrderTable.COL_TABLE_TOKEN, mTableID);
+                            contentValues.put(OrderTable.COL_STATUS, orderJsonObject.getString("status"));
+                            orderTable.insert(contentValues);
+                        } else {
 
-                    ContentValues contentValues = new ContentValues();
-                    contentValues.put(OrderTable.COL_ORDER_TOKEN, "test");
-                    contentValues.put(OrderTable.COL_STORE_ID, mStoreID);
-                    contentValues.put(OrderTable.COL_TABLE_TOKEN, mTableID);
-                    contentValues.put(OrderTable.COL_STATUS, 1);
-                    orderTable.insert(contentValues);
-
+                        }
+                    } else {
+                        //TODO: data is ivalid.
+                        Log.d(TAG, jsonObject.toString());
+                    }
                 } else {
                     //TODO: check in error
+                    Log.d(TAG, jsonObject.toString());
                 }
             } catch (JSONException e) {
                 e.printStackTrace();
