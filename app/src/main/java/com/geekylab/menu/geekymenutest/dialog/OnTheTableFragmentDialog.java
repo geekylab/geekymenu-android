@@ -5,6 +5,7 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
@@ -18,6 +19,8 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import com.geekylab.menu.geekymenutest.R;
+import com.geekylab.menu.geekymenutest.db.MySQLiteOpenHelper;
+import com.geekylab.menu.geekymenutest.db.table.OrderTable;
 import com.geekylab.menu.geekymenutest.network.DownloadJsonAsyncTaskHelper;
 import com.geekylab.menu.geekymenutest.network.IFTaskCallback;
 import com.geekylab.menu.geekymenutest.openapi.Params;
@@ -115,6 +118,16 @@ public class OnTheTableFragmentDialog extends DialogFragment implements IFTaskCa
             try {
                 if (jsonObject.has("status") && jsonObject.getBoolean("status")) {
                     Toast.makeText(activity, "get response from cloud true", Toast.LENGTH_SHORT).show();
+//                    getActivity().deleteDatabase(MySQLiteOpenHelper.DB);
+                    OrderTable orderTable = new OrderTable(getActivity());
+
+                    ContentValues contentValues = new ContentValues();
+                    contentValues.put(OrderTable.COL_ORDER_TOKEN, "test");
+                    contentValues.put(OrderTable.COL_STORE_ID, mStoreID);
+                    contentValues.put(OrderTable.COL_TABLE_TOKEN, mTableID);
+                    contentValues.put(OrderTable.COL_STATUS, 1);
+                    orderTable.insert(contentValues);
+
                 } else {
                     //TODO: check in error
                 }

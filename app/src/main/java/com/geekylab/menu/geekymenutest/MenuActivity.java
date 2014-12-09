@@ -212,7 +212,7 @@ public class MenuActivity extends Activity implements
                 case 1:
                     return StoreCategoryListFragment.newInstance(position + 1, mStoreId);
                 default:
-                    return HistoryFragment.newInstance(position + 1);
+                    return HistoryFragment.newInstance(position + 1, mStoreId);
             }
 
         }

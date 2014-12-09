@@ -1,11 +1,20 @@
 package com.geekylab.menu.geekymenutest;
 
 
-import android.os.Bundle;
 import android.app.Fragment;
+import android.app.ListFragment;
+import android.app.LoaderManager;
+import android.content.Context;
+import android.content.Loader;
+import android.database.Cursor;
+import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.SimpleCursorAdapter;
+
+import com.geekylab.menu.geekymenutest.db.table.OrderTable;
 
 
 /**
@@ -13,10 +22,13 @@ import android.view.ViewGroup;
  * Use the {@link HistoryFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class HistoryFragment extends Fragment {
+public class HistoryFragment extends ListFragment {
     private static final String ARG_SECTION_NUMBER = "section_number";
+    private static final String ARG_STORE_ID = "store_id";
+    private static final String TAG = "HistoryFragment";
 
     private int mSectionNumber;
+    private String mStoreId;
 
     /**
      * Use this factory method to create a new instance of
@@ -25,10 +37,11 @@ public class HistoryFragment extends Fragment {
      * @return A new instance of fragment HistoryFragment.
      */
     // TODO: Rename and change types and number of parameters
-    public static HistoryFragment newInstance(int sectionNumber) {
+    public static HistoryFragment newInstance(int sectionNumber, String store_id) {
         HistoryFragment fragment = new HistoryFragment();
         Bundle args = new Bundle();
         args.putInt(ARG_SECTION_NUMBER, sectionNumber);
+        args.putString(ARG_STORE_ID, store_id);
         fragment.setArguments(args);
         return fragment;
     }
@@ -42,7 +55,33 @@ public class HistoryFragment extends Fragment {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
             mSectionNumber = getArguments().getInt(ARG_SECTION_NUMBER);
+            mStoreId = getArguments().getString(ARG_STORE_ID);
         }
+
+    }
+
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        OrderTable orderTable = new OrderTable(getActivity());
+        Cursor orderCursor = orderTable.findByStoreId(mStoreId);
+        String[] from = {
+                OrderTable.COL_STORE_ID
+        };
+
+        int[] to = {
+                R.id.testText,
+        };
+        SimpleCursorAdapter adapter = new SimpleCursorAdapter(getActivity(), R.layout.history_item, orderCursor, from, to, 0);
+        setListAdapter(adapter);
+
+//        adapter.setViewBinder(new SimpleCursorAdapter.ViewBinder() {
+//
+//            @Override
+//            public boolean setViewValue(View view, Cursor cursor, int columnIndex) {
+//                return false;
+//            }
+//        });
     }
 
     @Override
@@ -51,6 +90,5 @@ public class HistoryFragment extends Fragment {
         // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_history, container, false);
     }
-
 
 }
