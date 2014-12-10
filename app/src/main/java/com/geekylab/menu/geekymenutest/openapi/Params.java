@@ -5,7 +5,8 @@ package com.geekylab.menu.geekymenutest.openapi;
  * Kodokux System
  */
 public class Params {
-    public static final String OPEN_API_HOST_URL = "http://192.168.111.103:8080/open-api";
+    public static final String HOST_URL = "http://192.168.111.103:8080";
+    public static final String OPEN_API_HOST_URL = HOST_URL + "/open-api";
     public static final String OPEN_API_STORE_URL = OPEN_API_HOST_URL + "/store";
     public static final String OPEN_API_IMAGE_URL = OPEN_API_HOST_URL + "/image";
     public static final String OPEN_API_ITEM_URL = OPEN_API_HOST_URL + "/item";

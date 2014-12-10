@@ -10,6 +10,7 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
+import com.geekylab.menu.geekymenutest.openapi.Params;
 import com.google.android.gms.auth.GoogleAuthException;
 import com.google.android.gms.auth.GoogleAuthUtil;
 import com.google.android.gms.auth.UserRecoverableAuthException;
@@ -309,7 +310,7 @@ public abstract class PlusBaseActivity extends Activity
             try {
                 token = GoogleAuthUtil.getToken(getApplicationContext(), accountName, scopes);
                 HttpClient httpClient = new DefaultHttpClient();
-                HttpPost httpPost = new HttpPost("http://192.168.111.103:8080/auth/google-token");
+                HttpPost httpPost = new HttpPost(Params.HOST_URL + "/auth/google-token");
                 BasicNameValuePair access_token = new BasicNameValuePair("access_token", token);
                 List<NameValuePair> nameValuePairList = new ArrayList<NameValuePair>();
                 nameValuePairList.add(access_token);

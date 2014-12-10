@@ -14,7 +14,7 @@ import com.geekylab.menu.geekymenutest.db.table.OrderTable;
 public class MySQLiteOpenHelper extends SQLiteOpenHelper {
 
     public static final String DB = "geekymenu1.db";
-    public static final int DB_VERSION = 2;
+    public static final int DB_VERSION = 3;
     private static final String TAG = "MySQLiteOpenHelper";
 
     public MySQLiteOpenHelper(Context c) {
@@ -49,6 +49,7 @@ public class MySQLiteOpenHelper extends SQLiteOpenHelper {
                 OrderTable.COL_ID + " INTEGER primary key autoincrement, " +
                 OrderTable.COL_STORE_ID + " TEXT not null, " +
                 OrderTable.COL_ORDER_TOKEN + " TEXT not null, " +
+                OrderTable.COL_ORDER_NUMBER + " TEXT not null, " +
                 OrderTable.COL_TABLE_TOKEN + " INTEGER DEFAULT 0, " +
                 OrderTable.COL_STATUS + " INTEGER DEFAULT 0, " +
                 "created_at DATETIME DEFAULT CURRENT_TIMESTAMP " +
