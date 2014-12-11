@@ -1,4 +1,4 @@
-MyAndroidTest (Client for Geeky menu)
+Android Geeky menu client (Client for Geeky menu) under development
 =============
 
 
