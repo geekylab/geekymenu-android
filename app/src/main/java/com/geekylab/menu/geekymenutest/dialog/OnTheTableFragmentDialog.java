@@ -82,7 +82,6 @@ public class OnTheTableFragmentDialog extends DialogFragment implements IFTaskCa
             mTableID = getArguments().getString(ARG_TABLE_ID);
         }
 
-
         activity = getActivity();
         AlertDialog.Builder builder = new AlertDialog.Builder(activity);
 
@@ -92,7 +91,6 @@ public class OnTheTableFragmentDialog extends DialogFragment implements IFTaskCa
 
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
         final String service_token = prefs.getString("service_token", null);
-
 
         builder.setView(content);
 
