@@ -67,7 +67,7 @@ public abstract class PlusBaseActivity extends Activity
     // attempt has been made, this is non-null.
     // If this IS null, then the connect method is still running.
     private ConnectionResult mConnectionResult;
-    private String mAccountName;
+    protected String mAccountName;
 
 
     /**
@@ -246,7 +246,7 @@ public abstract class PlusBaseActivity extends Activity
             // in, so we can stop the progress spinner.
             setProgressBarVisible(false);
         } else if (requestCode == REQ_SIGN_IN_REQUIRED && responseCode == RESULT_OK) {
-            new RetrieveTokenTask().execute(mAccountName);
+//            new RetrieveTokenTask().execute(mAccountName);
         }
     }
 
@@ -257,8 +257,6 @@ public abstract class PlusBaseActivity extends Activity
     public void onConnected(Bundle connectionHint) {
         updateConnectButtonState();
         setProgressBarVisible(false);
-        mAccountName = Plus.AccountApi.getAccountName(mGoogleApiClient);
-        new RetrieveTokenTask().execute(mAccountName);
 
 
         onPlusClientSignIn();
@@ -299,7 +297,7 @@ public abstract class PlusBaseActivity extends Activity
         return mGoogleApiClient;
     }
 
-    private class RetrieveTokenTask extends AsyncTask<String, Void, String> {
+    protected class RetrieveTokenTask extends AsyncTask<String, Void, String> {
 
         @Override
         protected String doInBackground(String... params) {

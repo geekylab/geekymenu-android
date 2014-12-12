@@ -1,13 +1,13 @@
 package com.geekylab.menu.geekymenutest;
 
-import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
-import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.LoaderManager;
+import android.app.ProgressDialog;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.CursorLoader;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.Loader;
 import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
@@ -15,7 +15,6 @@ import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
-import android.os.Build;
 import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.util.Log;
@@ -25,19 +24,30 @@ import android.view.WindowManager;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
-import android.widget.TextView;
 
+import com.geekylab.menu.geekymenutest.network.GoogleTokenRestTask;
+import com.geekylab.menu.geekymenutest.network.RestTask;
+import com.geekylab.menu.geekymenutest.openapi.Params;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.common.SignInButton;
-import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
 import com.google.android.gms.plus.People;
 import com.google.android.gms.plus.Plus;
-import com.google.android.gms.plus.model.people.Person;
+
+import org.apache.http.NameValuePair;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpPut;
+import org.apache.http.message.BasicNameValuePair;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -47,7 +57,12 @@ public class FirstActivity extends PlusBaseActivity implements LoaderManager.Loa
     public static final String EXTRA_MESSAGE = "message";
     public static final String PROPERTY_REG_ID = "registration_id";
     private static final String PROPERTY_APP_VERSION = "appVersion";
+    private static final String PROPERTY_USER_TOKEN = "user_token";
     private final static int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
+    private static final int REQ_SIGN_IN_REQUIRED = 55664;
+    private static final String GOOGLE_TOKEN_ACTION = "google_token_action";
+    private static final String SEND_REGISTRATION_ID_ACTION = "SEND_REGISTRATION_ID_ACTION";
+    private ProgressDialog progressDialog;
 
     /**
      * Substitute you own sender ID here. This is the project number you got
@@ -61,6 +76,7 @@ public class FirstActivity extends PlusBaseActivity implements LoaderManager.Loa
     public static final String ARG_TABLE_ID = "table_id";
     private GoogleCloudMessaging gcm;
     private String regid;
+    private String mServiceToken;
     private Context context;
     private Button mQrCodeButton;
     private AutoCompleteTextView mEmailView;
@@ -76,20 +92,63 @@ public class FirstActivity extends PlusBaseActivity implements LoaderManager.Loa
         int IS_PRIMARY = 1;
     }
 
+    private BroadcastReceiver taskReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (progressDialog != null)
+                progressDialog.dismiss();
+
+            String response = "";
+            if (intent.getAction().equals(GOOGLE_TOKEN_ACTION)) {
+                response = intent.getStringExtra(GoogleTokenRestTask.HTTP_RESPONSE);
+                if (response != null) {
+                    JSONObject jsonObject = null;
+                    Boolean status = false;
+                    try {
+                        jsonObject = new JSONObject(response);
+                        status = jsonObject.getBoolean("status");
+                        if (jsonObject.has("profile")) {
+                            JSONObject profileJsonObject = jsonObject.getJSONObject("profile");
+                            mServiceToken = profileJsonObject.getString("service_token");
+                        }
+
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+
+                    if (status && !mServiceToken.isEmpty()) {
+                        storeGoogleToken(context, mServiceToken);
+
+                        //register regId
+                        gcm = GoogleCloudMessaging.getInstance(FirstActivity.this);
+                        regid = getRegistrationId(context);
+                        if (true || regid.isEmpty()) {
+                            progressDialog = ProgressDialog.show(FirstActivity.this, "Registration service", "Waitng for results....");
+                            registerInBackground();
+                        }
+                    }
+                }
+            } else {
+                response = intent.getStringExtra(RestTask.HTTP_RESPONSE);
+            }
+
+            Log.d(TAG, "BroadcastReceiver : " + response);
+        }
+    };
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         //Remove title bar
         requestWindowFeature(Window.FEATURE_NO_TITLE);
-
         //Remove notification bar
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        setContentView(R.layout.activity_first);
 
         context = getApplicationContext();
 
-
+        mPlusSignInButton = (SignInButton) findViewById(R.id.plus_sign_in_button);
         if (checkPlayServices()) {
             // Set a listener to connect the user when the G+ button is clicked.
             mPlusSignInButton.setOnClickListener(new View.OnClickListener() {
@@ -98,13 +157,6 @@ public class FirstActivity extends PlusBaseActivity implements LoaderManager.Loa
                     signIn();
                 }
             });
-
-//            gcm = GoogleCloudMessaging.getInstance(this);
-//            regid = getRegistrationId(context);
-//
-//            if (regid.isEmpty()) {
-//                registerInBackground();
-//            }
 
         } else {
             // Don't offer G+ sign in if the app's version is too low to support Google Play
@@ -117,7 +169,6 @@ public class FirstActivity extends PlusBaseActivity implements LoaderManager.Loa
 //        populateAutoComplete();
 
 
-//        setContentView(R.layout.activity_first);
 //        mQrCodeButton = (Button) findViewById(R.id.read_qrcode);
 //        mQrCodeButton.setOnClickListener(this);
     }
@@ -127,6 +178,16 @@ public class FirstActivity extends PlusBaseActivity implements LoaderManager.Loa
     protected void onResume() {
         super.onResume();
         checkPlayServices();
+        IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction(GOOGLE_TOKEN_ACTION);
+        intentFilter.addAction(SEND_REGISTRATION_ID_ACTION);
+        registerReceiver(taskReceiver, intentFilter);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        unregisterReceiver(taskReceiver);
     }
 
     private void populateAutoComplete() {
@@ -228,6 +289,26 @@ public class FirstActivity extends PlusBaseActivity implements LoaderManager.Loa
         return registrationId;
     }
 
+//    private String getUserToken(Context context) {
+//        final SharedPreferences prefs = getGCMPreferences(context);
+//        String registrationId = prefs.getString(PROPERTY_USER_TOKEN, "");
+//        if (registrationId.isEmpty()) {
+//            Log.i(TAG, "User token not found.");
+//            return "";
+//        }
+//
+//        // Check if app was updated; if so, it must clear the registration ID
+//        // since the existing regID is not guaranteed to work with the new
+//        // app version.
+//        int registeredVersion = prefs.getInt(PROPERTY_APP_VERSION, Integer.MIN_VALUE);
+//        int currentVersion = getAppVersion(context);
+//        if (registeredVersion != currentVersion) {
+//            Log.i(TAG, "App version changed.");
+//            return "";
+//        }
+//        return registrationId;
+//    }
+
     /**
      * @return Application's {@code SharedPreferences}.
      */
@@ -326,8 +407,44 @@ public class FirstActivity extends PlusBaseActivity implements LoaderManager.Loa
      * using the 'from' address in the message.
      */
     private void sendRegistrationIdToBackend() {
-        // Your implementation here.
-        Log.d(TAG, "regid : " + regid);
+        // Eu jah estou no background!!!
+        if (mServiceToken != null && !mServiceToken.isEmpty()) {
+
+            HttpPut httpPut;
+            try {
+                httpPut = new HttpPut(new URI(Params.OPEN_API_HOST_URL + "/regid"));
+                httpPut.addHeader("X-Auth-Hash", mServiceToken);
+                List<NameValuePair> parameters = new ArrayList<NameValuePair>();
+                parameters.add(new BasicNameValuePair("regid", regid));
+                httpPut.setEntity(new UrlEncodedFormEntity(parameters));
+
+                new RestTask(context, SEND_REGISTRATION_ID_ACTION)
+                        .execute(httpPut);
+
+            } catch (URISyntaxException e) {
+                e.printStackTrace();
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
+            }
+
+
+            Log.d(TAG, "sendRegistrationIdToBackend :: " + mServiceToken);
+        }
+    }
+
+    /**
+     * Stores the registration ID and app versionCode in the application's
+     * {@code SharedPreferences}.
+     *
+     * @param context application's context.
+     * @param regId   registration ID
+     */
+    private void storeGoogleToken(Context context, String regId) {
+        final SharedPreferences prefs = getGCMPreferences(context);
+        Log.i(TAG, "Saving serviceToken " + regId);
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.putString(PROPERTY_USER_TOKEN, regId);
+        editor.commit();
     }
 
     /**
@@ -357,39 +474,18 @@ public class FirstActivity extends PlusBaseActivity implements LoaderManager.Loa
 
     @Override
     protected void onPlusClientSignIn() {
-//Set up sign out and disconnect buttons.
-        Person currentUser = Plus.PeopleApi.getCurrentPerson(getPlusClient());
-//        String accountName = Plus.AccountApi.getAccountName(getPlusClient());
 
-
-        if (currentUser != null) {
-
-            String android_id = android.provider.Settings.Secure.getString(
-                    getContentResolver(),
-                    android.provider.Settings.Secure.ANDROID_ID
-            );
-
-
-            Log.d(TAG, android_id);
-            ((TextView) findViewById(R.id.displayName)).setText(currentUser.getDisplayName());
+        //get token
+        String accountName = Plus.AccountApi.getAccountName(getPlusClient());
+        if (!accountName.isEmpty()) {
+            GoogleTokenRestTask googleTokenRestTask =
+                    new GoogleTokenRestTask(context, GOOGLE_TOKEN_ACTION, accountName);
+            googleTokenRestTask.execute();
+            progressDialog = ProgressDialog.show(this, "Login", "Waitng for results....");
+        } else {
+            Log.d(TAG, "accountName is null");
         }
-//        currentUser.getAgeRange();
 
-
-//        Button signOutButton = (Button) findViewById(R.id.plus_sign_out_button);
-//        signOutButton.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//                signOut();
-//            }
-//        });
-//        Button disconnectButton = (Button) findViewById(R.id.plus_disconnect_button);
-//        disconnectButton.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//                revokeAccess();
-//            }
-//        });
     }
 
     @Override
@@ -406,7 +502,6 @@ public class FirstActivity extends PlusBaseActivity implements LoaderManager.Loa
     protected void updateConnectButtonState() {
 
     }
-
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
