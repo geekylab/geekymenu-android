@@ -1,29 +1,48 @@
 package com.geekylab.menu.geekymenutest;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.annotation.TargetApi;
 import android.app.Activity;
+import android.app.LoaderManager;
 import android.content.Context;
+import android.content.CursorLoader;
 import android.content.Intent;
+import android.content.Loader;
 import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
+import android.provider.ContactsContract;
 import android.util.Log;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
 import android.widget.Button;
+import android.widget.TextView;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
+import com.google.android.gms.common.SignInButton;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
+import com.google.android.gms.plus.People;
+import com.google.android.gms.plus.Plus;
+import com.google.android.gms.plus.model.people.Person;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 
-public class FirstActivity extends Activity implements View.OnClickListener {
+public class FirstActivity extends PlusBaseActivity implements LoaderManager.LoaderCallbacks<Cursor>, ResultCallback<People.LoadPeopleResult> {
 
     public static final String EXTRA_MESSAGE = "message";
     public static final String PROPERTY_REG_ID = "registration_id";
@@ -44,6 +63,18 @@ public class FirstActivity extends Activity implements View.OnClickListener {
     private String regid;
     private Context context;
     private Button mQrCodeButton;
+    private AutoCompleteTextView mEmailView;
+    private SignInButton mPlusSignInButton;
+
+    private interface ProfileQuery {
+        String[] PROJECTION = {
+                ContactsContract.CommonDataKinds.Email.ADDRESS,
+                ContactsContract.CommonDataKinds.Email.IS_PRIMARY,
+        };
+
+        int ADDRESS = 0;
+        int IS_PRIMARY = 1;
+    }
 
 
     @Override
@@ -60,18 +91,35 @@ public class FirstActivity extends Activity implements View.OnClickListener {
 
 
         if (checkPlayServices()) {
-            gcm = GoogleCloudMessaging.getInstance(this);
-            regid = getRegistrationId(context);
+            // Set a listener to connect the user when the G+ button is clicked.
+            mPlusSignInButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    signIn();
+                }
+            });
 
-            if (regid.isEmpty()) {
-                registerInBackground();
-            }
+//            gcm = GoogleCloudMessaging.getInstance(this);
+//            regid = getRegistrationId(context);
+//
+//            if (regid.isEmpty()) {
+//                registerInBackground();
+//            }
 
+        } else {
+            // Don't offer G+ sign in if the app's version is too low to support Google Play
+            // Services.
+            mPlusSignInButton.setVisibility(View.GONE);
+            return;
         }
 
-        setContentView(R.layout.activity_first);
-        mQrCodeButton = (Button) findViewById(R.id.read_qrcode);
-        mQrCodeButton.setOnClickListener(this);
+//        mEmailView = (AutoCompleteTextView) findViewById(R.id.email);
+//        populateAutoComplete();
+
+
+//        setContentView(R.layout.activity_first);
+//        mQrCodeButton = (Button) findViewById(R.id.read_qrcode);
+//        mQrCodeButton.setOnClickListener(this);
     }
 
     // You need to do the Play Services APK check here too.
@@ -81,18 +129,22 @@ public class FirstActivity extends Activity implements View.OnClickListener {
         checkPlayServices();
     }
 
-
-    @Override
-    public void onClick(View v) {
-        switch (v.getId()) {
-            case R.id.read_qrcode:
-
-            default:
-                Intent zxing_intent = new Intent("com.google.zxing.client.android.SCAN");
-                zxing_intent.putExtra("SCAN_MODE", "QR_CODE_MODE");
-                startActivityForResult(zxing_intent, SCANNER_REQUEST_CODE);
-        }
+    private void populateAutoComplete() {
+        getLoaderManager().initLoader(0, null, this);
     }
+
+
+//    @Override
+//    public void onClick(View v) {
+//        switch (v.getId()) {
+//            case R.id.read_qrcode:
+//
+//            default:
+//                Intent zxing_intent = new Intent("com.google.zxing.client.android.SCAN");
+//                zxing_intent.putExtra("SCAN_MODE", "QR_CODE_MODE");
+//                startActivityForResult(zxing_intent, SCANNER_REQUEST_CODE);
+//        }
+//    }
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent intent) {
@@ -295,5 +347,113 @@ public class FirstActivity extends Activity implements View.OnClickListener {
         editor.commit();
     }
 
+    /**
+     * Login
+     */
+    @Override
+    protected void onPlusClientRevokeAccess() {
+
+    }
+
+    @Override
+    protected void onPlusClientSignIn() {
+//Set up sign out and disconnect buttons.
+        Person currentUser = Plus.PeopleApi.getCurrentPerson(getPlusClient());
+//        String accountName = Plus.AccountApi.getAccountName(getPlusClient());
+
+
+        if (currentUser != null) {
+
+            String android_id = android.provider.Settings.Secure.getString(
+                    getContentResolver(),
+                    android.provider.Settings.Secure.ANDROID_ID
+            );
+
+
+            Log.d(TAG, android_id);
+            ((TextView) findViewById(R.id.displayName)).setText(currentUser.getDisplayName());
+        }
+//        currentUser.getAgeRange();
+
+
+//        Button signOutButton = (Button) findViewById(R.id.plus_sign_out_button);
+//        signOutButton.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//                signOut();
+//            }
+//        });
+//        Button disconnectButton = (Button) findViewById(R.id.plus_disconnect_button);
+//        disconnectButton.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//                revokeAccess();
+//            }
+//        });
+    }
+
+    @Override
+    protected void onPlusClientSignOut() {
+
+    }
+
+    @Override
+    protected void onPlusClientBlockingUI(boolean show) {
+
+    }
+
+    @Override
+    protected void updateConnectButtonState() {
+
+    }
+
+
+    @Override
+    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+        return new CursorLoader(this,
+                // Retrieve data rows for the device user's 'profile' contact.
+                Uri.withAppendedPath(ContactsContract.Profile.CONTENT_URI,
+                        ContactsContract.Contacts.Data.CONTENT_DIRECTORY), ProfileQuery.PROJECTION,
+
+                // Select only email addresses.
+                ContactsContract.Contacts.Data.MIMETYPE +
+                        " = ?", new String[]{ContactsContract.CommonDataKinds.Email
+                .CONTENT_ITEM_TYPE},
+
+                // Show primary email addresses first. Note that there won't be
+                // a primary email address if the user hasn't specified one.
+                ContactsContract.Contacts.Data.IS_PRIMARY + " DESC");
+    }
+
+    @Override
+    public void onLoadFinished(Loader<Cursor> cursorLoader, Cursor cursor) {
+        List<String> emails = new ArrayList<String>();
+        cursor.moveToFirst();
+        while (!cursor.isAfterLast()) {
+            emails.add(cursor.getString(ProfileQuery.ADDRESS));
+            cursor.moveToNext();
+        }
+
+        addEmailsToAutoComplete(emails);
+    }
+
+    @Override
+    public void onLoaderReset(Loader<Cursor> loader) {
+
+    }
+
+    @Override
+    public void onResult(People.LoadPeopleResult loadPeopleResult) {
+
+    }
+
+    private void addEmailsToAutoComplete(List<String> emailAddressCollection) {
+        //Create adapter to tell the AutoCompleteTextView what to show in its dropdown list.
+        ArrayAdapter<String> adapter =
+                new ArrayAdapter<String>(FirstActivity.this,
+                        android.R.layout.simple_dropdown_item_1line, emailAddressCollection);
+
+//        mEmailView.setAdapter(adapter);
+    }
 
 }
