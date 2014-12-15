@@ -9,6 +9,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -19,6 +20,7 @@ import android.view.ViewGroup;
 public class DashBoardActivity extends ActionBarActivity
         implements NavigationDrawerFragment.NavigationDrawerCallbacks {
 
+    private static final String TAG = DashBoardActivity.class.getSimpleName();
     /**
      * Fragment managing the behaviors, interactions and presentation of the navigation drawer.
      */
@@ -46,9 +48,25 @@ public class DashBoardActivity extends ActionBarActivity
     @Override
     public void onNavigationDrawerItemSelected(int position) {
         // update the main content by replacing fragments
+
+        Log.d(TAG, "onNavigationDrawerItemSelected : " + position);
+
+        Fragment fragment = null;
+        switch (position) {
+            case 0: //user settings
+                fragment = PlaceholderFragment.newInstance(position + 1);
+                break;
+            case 1: //checkin
+                fragment = CheckInFragment.newInstance();
+                break;
+            case 2: //all history
+                fragment = PlaceholderFragment.newInstance(position + 1);
+                break;
+        }
+
         FragmentManager fragmentManager = getSupportFragmentManager();
         fragmentManager.beginTransaction()
-                .replace(R.id.container, PlaceholderFragment.newInstance(position + 1))
+                .replace(R.id.container, fragment)
                 .commit();
     }
 
