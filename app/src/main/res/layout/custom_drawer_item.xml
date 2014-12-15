@@ -1,0 +1,82 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              xmlns:tools="http://schemas.android.com/tools"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:orientation="horizontal"
+              android:descendantFocusability="blocksDescendants"
+              tools:context=".NavigationDrawerFragment"
+    >
+
+    <FrameLayout
+        android:id="@+id/user_item_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:minHeight="100dp"
+        >
+
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scaleType="centerCrop"
+            android:alpha="0.5"
+            android:src="@drawable/image1"/>
+
+        <LinearLayout
+            android:layout_margin="15dp"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+
+            <ImageView
+                android:layout_gravity="center_vertical"
+                android:layout_height="wrap_content"
+                android:layout_width="wrap_content"
+                android:src="@drawable/ic_call"/>
+
+            <TextView
+                android:id="@+id/user_name"
+                android:paddingTop="20dp"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                style="@android:style/TextAppearance.DeviceDefault.Large"/>
+
+
+        </LinearLayout>
+
+    </FrameLayout>
+
+    <TableLayout
+        android:id="@+id/simple_item_layout"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:minHeight="60dp"
+        android:gravity="center_vertical"
+        >
+
+        <TableRow
+            android:layout_height="match_parent"
+            android:layout_width="match_parent">
+
+            <ImageView
+                android:id="@+id/drawer_icon"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_bookmark"
+                android:gravity="center_vertical"
+                android:contentDescription="@string/test_list"/>
+
+            <TextView
+                android:id="@+id/drawer_itemName"
+                android:paddingLeft="15dp"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:gravity="center_vertical"
+                android:text="test"
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                />
+        </TableRow>
+    </TableLayout>
+
+
+</LinearLayout>

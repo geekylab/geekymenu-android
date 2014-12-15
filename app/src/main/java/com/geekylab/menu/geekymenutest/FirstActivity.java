@@ -120,6 +120,9 @@ public class FirstActivity extends Activity {
                             progressDialog = ProgressDialog.show(FirstActivity.this, "Registration service", "Waitng for results....");
                             registerInBackground();
                         }
+
+                        Intent DashBoardIntent = new Intent(FirstActivity.this, DashBoardActivity.class);
+                        startActivity(DashBoardIntent);
                     }
                 }
             } else {
@@ -152,7 +155,8 @@ public class FirstActivity extends Activity {
                     if (mServiceToken.isEmpty()) {
                         pickUserAccount();
                     } else {
-
+                        Intent intent = new Intent(FirstActivity.this, DashBoardActivity.class);
+                        startActivity(intent);
                     }
                 }
             });
@@ -212,19 +216,6 @@ public class FirstActivity extends Activity {
         super.onPause();
         unregisterReceiver(taskReceiver);
     }
-
-
-//    @Override
-//    public void onClick(View v) {
-//        switch (v.getId()) {
-//            case R.id.read_qrcode:
-//
-//            default:
-//                Intent zxing_intent = new Intent("com.google.zxing.client.android.SCAN");
-//                zxing_intent.putExtra("SCAN_MODE", "QR_CODE_MODE");
-//                startActivityForResult(zxing_intent, SCANNER_REQUEST_CODE);
-//        }
-//    }
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent intent) {
