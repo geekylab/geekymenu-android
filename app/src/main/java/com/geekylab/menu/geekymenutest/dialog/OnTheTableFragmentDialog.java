@@ -4,14 +4,13 @@ package com.geekylab.menu.geekymenutest.dialog;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
-import android.app.DialogFragment;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.v4.app.DialogFragment;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -19,12 +18,10 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import com.geekylab.menu.geekymenutest.R;
-import com.geekylab.menu.geekymenutest.db.MySQLiteOpenHelper;
 import com.geekylab.menu.geekymenutest.db.table.OrderTable;
 import com.geekylab.menu.geekymenutest.network.DownloadJsonAsyncTaskHelper;
 import com.geekylab.menu.geekymenutest.network.IFTaskCallback;
 import com.geekylab.menu.geekymenutest.openapi.Params;
-import com.google.android.gms.common.internal.o;
 
 import org.apache.http.NameValuePair;
 import org.apache.http.client.methods.HttpPost;

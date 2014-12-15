@@ -3,13 +3,12 @@ package com.geekylab.menu.geekymenutest;
 import android.app.Activity;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
-import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -18,10 +17,12 @@ import android.view.View;
 import android.view.ViewGroup;
 
 
-public class DashBoardActivity extends ActionBarActivity
+public class DashBoardActivity extends DebugActivity
         implements NavigationDrawerFragment.NavigationDrawerCallbacks, CheckInFragment.OnFragmentInteractionListener {
 
-    private static final String TAG = DashBoardActivity.class.getSimpleName();
+    public static final String TAG = DashBoardActivity.class.getSimpleName();
+    private static final String ARG_STORE_ID = "store_id";
+    private static final String ARG_TABLE_ID = "table_id";
     /**
      * Fragment managing the behaviors, interactions and presentation of the navigation drawer.
      */
@@ -31,20 +32,52 @@ public class DashBoardActivity extends ActionBarActivity
      * Used to store the last screen title. For use in {@link #restoreActionBar()}.
      */
     private CharSequence mTitle;
+    private String mStoreId;
+    private String mTableId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_dash_board);
 
+        if (savedInstanceState != null) {
+            mStoreId = savedInstanceState.getString(ARG_STORE_ID);
+            mTableId = savedInstanceState.getString(ARG_TABLE_ID);
+            Log.d(TAG, "onCreate mStoreId : " + mStoreId);
+            Log.d(TAG, "onCreate mTableId : " + mTableId);
+        }
+
+        setContentView(R.layout.activity_dash_board);
         mNavigationDrawerFragment = (NavigationDrawerFragment)
                 getSupportFragmentManager().findFragmentById(R.id.navigation_drawer);
         mTitle = getTitle();
+
         // Set up the drawer.
         mNavigationDrawerFragment.setUp(
                 R.id.navigation_drawer,
                 (DrawerLayout) findViewById(R.id.drawer_layout));
     }
+
+
+    @Override
+    public void onSaveInstanceState(Bundle savedInstanceState) {
+        super.onSaveInstanceState(savedInstanceState);
+        Log.d(TAG, "onSaveInstanceState mStoreId : " + mStoreId);
+        Log.d(TAG, "onSaveInstanceState mTableId : " + mTableId);
+        savedInstanceState.putString(ARG_STORE_ID, mStoreId);
+        savedInstanceState.putString(ARG_TABLE_ID, mTableId);
+    }
+
+//    @Override
+//    public void onRestoreInstanceState(Bundle savedInstanceState) {
+//        super.onRestoreInstanceState(savedInstanceState);
+//        // Restore UI state from the savedInstanceState.
+//        // This bundle has also been passed to onCreate.
+//        mStoreId = savedInstanceState.getString(ARG_STORE_ID);
+//        mTableId = savedInstanceState.getString(ARG_TABLE_ID);
+//
+//        Log.d(TAG, "onRestoreInstanceState mStoreId : " + mStoreId);
+//        Log.d(TAG, "onRestoreInstanceState mTableId : " + mTableId);
+//    }
 
     @Override
     public void onNavigationDrawerItemSelected(int position) {
@@ -53,22 +86,36 @@ public class DashBoardActivity extends ActionBarActivity
         Log.d(TAG, "onNavigationDrawerItemSelected : " + position);
 
         Fragment fragment = null;
+        String tag = null;
+        FragmentManager fragmentManager = getSupportFragmentManager();
         switch (position) {
             case 0: //user settings
                 fragment = PlaceholderFragment.newInstance(position + 1);
                 break;
             case 1: //checkin
-                fragment = CheckInFragment.newInstance();
+                if (mStoreId != null) {
+                    fragment = TabMenuFragment.newInstance(mStoreId, mTableId);
+                    tag = TabMenuFragment.TAG;
+                } else {
+                    fragment = CheckInFragment.newInstance(mStoreId, mTableId);
+                }
                 break;
             case 2: //all history
                 fragment = PlaceholderFragment.newInstance(position + 1);
                 break;
         }
 
-        FragmentManager fragmentManager = getSupportFragmentManager();
-        fragmentManager.beginTransaction()
-                .replace(R.id.container, fragment)
-                .commit();
+        FragmentTransaction transaction = fragmentManager.beginTransaction()
+//                .setCustomAnimations(android.R.animator.fade_in,
+//                        android.R.animator.fade_out)
+                ;
+        if (tag != null) {
+            transaction.replace(R.id.container, fragment, tag);
+        } else {
+            transaction.replace(R.id.container, fragment);
+        }
+
+        transaction.commit();
     }
 
     public void onSectionAttached(int number) {
@@ -124,8 +171,17 @@ public class DashBoardActivity extends ActionBarActivity
     }
 
     @Override
-    public void onFragmentInteraction(Uri uri) {
-
+    public void onFragmentInteraction(String storeId, String tableId) {
+        mStoreId = storeId;
+        mTableId = tableId;
+        TabMenuFragment tabMenuFragment = TabMenuFragment.newInstance(storeId, tableId);
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        fragmentManager.beginTransaction()
+//                .
+//                setCustomAnimations(android.R.animator.fade_in,
+//                        android.R.animator.fade_out)
+                .replace(R.id.container, tabMenuFragment)
+                .commit();
     }
 
     /**

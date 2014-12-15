@@ -1,10 +1,10 @@
 package com.geekylab.menu.geekymenutest;
 
 import android.app.Activity;
+import android.support.v4.app.Fragment;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -23,14 +23,12 @@ import java.util.List;
  */
 public class CheckInFragment extends Fragment {
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
     private static final String TAG = CheckInFragment.class.getSimpleName();
     private static final int SCANNER_REQUEST_CODE = 1234;
     public static final String ARG_STORE_ID = "store_id";
     public static final String ARG_TABLE_ID = "table_id";
 
-    private String mStore;
+    private String mStoreId;
     private String mTableId;
 
     private OnFragmentInteractionListener mListener;
@@ -41,11 +39,11 @@ public class CheckInFragment extends Fragment {
      *
      * @return A new instance of fragment CheckInFragment.
      */
-    public static CheckInFragment newInstance() {
+    public static CheckInFragment newInstance(String storeId, String tableId) {
         CheckInFragment fragment = new CheckInFragment();
         Bundle args = new Bundle();
-//        args.putString(ARG_PARAM1, param1);
-//        args.putString(ARG_PARAM2, param2);
+        args.putString(ARG_STORE_ID, storeId);
+        args.putString(ARG_TABLE_ID, tableId);
         fragment.setArguments(args);
         return fragment;
     }
@@ -57,10 +55,32 @@ public class CheckInFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-//        if (getArguments() != null) {
-//            mParam1 = getArguments().getString(ARG_PARAM1);
-//            mParam2 = getArguments().getString(ARG_PARAM2);
-//        }
+        if (getArguments() != null) {
+            mStoreId = getArguments().getString(ARG_STORE_ID);
+            mTableId = getArguments().getString(ARG_TABLE_ID);
+        }
+    }
+
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+
+        if (savedInstanceState != null) {
+            mStoreId = savedInstanceState.getString(ARG_STORE_ID);
+            mTableId = savedInstanceState.getString(ARG_TABLE_ID);
+        }
+
+        Log.d(TAG, "CheckInFragment onRestoreInstanceState mStoreId : " + mStoreId);
+        Log.d(TAG, "CheckInFragment onRestoreInstanceState mTableId : " + mTableId);
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle savedInstanceState) {
+        super.onSaveInstanceState(savedInstanceState);
+        Log.d(TAG, "CheckInFragment onSaveInstanceState mStoreId : " + mStoreId);
+        Log.d(TAG, "CheckInFragment onSaveInstanceState mTableId : " + mTableId);
+        savedInstanceState.putString(ARG_STORE_ID, mStoreId);
+        savedInstanceState.putString(ARG_TABLE_ID, mTableId);
     }
 
     @Override
@@ -72,8 +92,6 @@ public class CheckInFragment extends Fragment {
         qrCodeButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Log.d(TAG, "do read qr code");
-
                 Intent zxing_intent = new Intent("com.google.zxing.client.android.SCAN");
                 zxing_intent.putExtra("SCAN_MODE", "QR_CODE_MODE");
                 startActivityForResult(zxing_intent, SCANNER_REQUEST_CODE);
@@ -83,10 +101,9 @@ public class CheckInFragment extends Fragment {
         return view;
     }
 
-    // TODO: Rename method, update argument and hook method into UI event
-    public void onButtonPressed(Uri uri) {
+    public void onButtonPressed() {
         if (mListener != null) {
-            mListener.onFragmentInteraction(uri);
+            mListener.onFragmentInteraction(mStoreId, mTableId);
         }
     }
 
@@ -119,7 +136,7 @@ public class CheckInFragment extends Fragment {
      */
     public interface OnFragmentInteractionListener {
         // TODO: Update argument type and name
-        public void onFragmentInteraction(Uri uri);
+        public void onFragmentInteraction(String storeId, String tableId);
     }
 
     @Override
@@ -154,10 +171,13 @@ public class CheckInFragment extends Fragment {
                                 }
 
                                 //check table
-                                Intent menuIntent = new Intent(CheckInFragment.this.getActivity(), MenuActivity.class);
-                                menuIntent.putExtra(ARG_STORE_ID, mStoreId);
-                                menuIntent.putExtra(ARG_TABLE_ID, mTableId);
-                                startActivity(menuIntent);
+                                if (mListener != null) {
+                                    mListener.onFragmentInteraction(mStoreId, mTableId);
+                                }
+//                                Intent menuIntent = new Intent(CheckInFragment.this.getActivity(), MenuActivity.class);
+//                                menuIntent.putExtra(ARG_STORE_ID, mStoreId);
+//                                menuIntent.putExtra(ARG_TABLE_ID, mTableId);
+//                                startActivity(menuIntent);
                             }
                         }
                     }
