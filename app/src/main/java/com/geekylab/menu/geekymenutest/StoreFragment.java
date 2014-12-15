@@ -16,6 +16,7 @@ import com.geekylab.menu.geekymenutest.network.DownloadJsonAsyncTaskHelper;
 import com.geekylab.menu.geekymenutest.network.IFTaskCallback;
 import com.geekylab.menu.geekymenutest.network.ImageDownloader;
 import com.geekylab.menu.geekymenutest.openapi.Params;
+import com.nostra13.universalimageloader.core.ImageLoader;
 
 import org.apache.http.client.methods.HttpPost;
 import org.json.JSONArray;
@@ -29,7 +30,7 @@ import java.util.Locale;
 /**
  * A simple {@link Fragment} subclass.
  */
-public class StoreFragment extends Fragment implements IFTaskCallback {
+public class StoreFragment extends DebugFragment implements IFTaskCallback {
     private static final String ARG_SECTION_NUMBER = "section_number";
     private static final String ARG_CURRENT_STORE_ID = "current_store_id";
     private static final String ARG_CURRENT_TABLE_ID = "current_table_id";
@@ -41,6 +42,7 @@ public class StoreFragment extends Fragment implements IFTaskCallback {
     private String mStoreID;
     private String mTableID;
     protected View inflate;
+    private ImageLoader loader;
 
     public static StoreFragment newInstance(int sectionNumber, String storeId, String TableId) {
         StoreFragment fragment = new StoreFragment();
@@ -57,13 +59,19 @@ public class StoreFragment extends Fragment implements IFTaskCallback {
         // Required empty public constructor
         imageDownloader.setMode(ImageDownloader.Mode.NO_DOWNLOADED_DRAWABLE);
         defaultLanguage = Locale.getDefault().getLanguage();
+    }
 
+    @Override
+    String getClassTag() {
+        return TAG;
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        setRetainInstance(true);
+        loader = ImageLoader.getInstance();
         if (getArguments() != null) {
             mStoreID = getArguments().getString(ARG_CURRENT_STORE_ID);
             mTableID = getArguments().getString(ARG_CURRENT_TABLE_ID);
@@ -101,6 +109,7 @@ public class StoreFragment extends Fragment implements IFTaskCallback {
 
     @Override
     public void onFinish(Object obj) {
+        Log.d(TAG, "onFinish");
         JSONObject jsonObject = (JSONObject) obj;
         if (jsonObject != null) {
             Boolean status;
@@ -157,7 +166,7 @@ public class StoreFragment extends Fragment implements IFTaskCallback {
                     String categoryImageUrl = images.get(0);
                     Log.d(TAG, "Image url : " + categoryImageUrl);
 //                    headerImageView.setTag(categoryImageUrl);
-                    imageDownloader.download(categoryImageUrl, headerImageView);
+                    loader.displayImage(categoryImageUrl, headerImageView);
                 }
             }
         } else {

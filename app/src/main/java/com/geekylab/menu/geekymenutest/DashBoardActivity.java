@@ -16,6 +16,10 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.nostra13.universalimageloader.cache.memory.impl.LruMemoryCache;
+import com.nostra13.universalimageloader.core.ImageLoader;
+import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
+
 
 public class DashBoardActivity extends DebugActivity
         implements NavigationDrawerFragment.NavigationDrawerCallbacks, CheckInFragment.OnFragmentInteractionListener {
@@ -34,6 +38,7 @@ public class DashBoardActivity extends DebugActivity
     private CharSequence mTitle;
     private String mStoreId;
     private String mTableId;
+    private boolean mIsSavedInstanceState = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,7 +49,14 @@ public class DashBoardActivity extends DebugActivity
             mTableId = savedInstanceState.getString(ARG_TABLE_ID);
             Log.d(TAG, "onCreate mStoreId : " + mStoreId);
             Log.d(TAG, "onCreate mTableId : " + mTableId);
+            mIsSavedInstanceState = true;
         }
+
+        ImageLoaderConfiguration config = new ImageLoaderConfiguration.Builder(getApplicationContext())
+                .memoryCache(new LruMemoryCache(2 * 1024 * 1024))
+                .memoryCacheSize(2 * 1024 * 1024)
+                .build();
+        ImageLoader.getInstance().init(config);
 
         setContentView(R.layout.activity_dash_board);
         mNavigationDrawerFragment = (NavigationDrawerFragment)
@@ -91,17 +103,20 @@ public class DashBoardActivity extends DebugActivity
         switch (position) {
             case 0: //user settings
                 fragment = PlaceholderFragment.newInstance(position + 1);
+//                tag = "pos " + position + 1;
                 break;
             case 1: //checkin
                 if (mStoreId != null) {
-                    fragment = TabMenuFragment.newInstance(mStoreId, mTableId);
-                    tag = TabMenuFragment.TAG;
+                    Log.d(TAG, "TabMenuFragment.newInstance");
+                    fragment = StoreFragment.newInstance(position + 1, mStoreId, mTableId);
+//                    tag = TabMenuFragment.TAG;
                 } else {
                     fragment = CheckInFragment.newInstance(mStoreId, mTableId);
                 }
                 break;
             case 2: //all history
                 fragment = PlaceholderFragment.newInstance(position + 1);
+//                tag = "pos " + position + 1;
                 break;
         }
 
@@ -119,6 +134,7 @@ public class DashBoardActivity extends DebugActivity
     }
 
     public void onSectionAttached(int number) {
+        Log.d(TAG, "onSectionAttached : " + number);
         switch (number) {
             case 1:
                 mTitle = getString(R.string.title_section1);
@@ -174,7 +190,7 @@ public class DashBoardActivity extends DebugActivity
     public void onFragmentInteraction(String storeId, String tableId) {
         mStoreId = storeId;
         mTableId = tableId;
-        TabMenuFragment tabMenuFragment = TabMenuFragment.newInstance(storeId, tableId);
+        Fragment tabMenuFragment = StoreFragment.newInstance(2, storeId, tableId);
         FragmentManager fragmentManager = getSupportFragmentManager();
         fragmentManager.beginTransaction()
 //                .
@@ -207,6 +223,12 @@ public class DashBoardActivity extends DebugActivity
         }
 
         public PlaceholderFragment() {
+        }
+
+        @Override
+        public void onCreate(Bundle savedInstanceState) {
+            super.onCreate(savedInstanceState);
+//            setRetainInstance(true);
         }
 
         @Override

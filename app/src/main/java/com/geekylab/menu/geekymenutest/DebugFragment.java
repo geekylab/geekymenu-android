@@ -13,8 +13,14 @@ import android.view.ViewGroup;
  * Created by johna on 15/12/14.
  * Kodokux System
  */
-public class DebugFragment extends Fragment {
-    protected static final String TAG = "TabMenuFragment";
+public abstract class DebugFragment extends Fragment {
+    protected final String TAG;
+
+    protected DebugFragment() {
+        TAG = getClassTag();
+    }
+
+    abstract String getClassTag();
 
     @Override
     public void onAttach(Activity activity) {

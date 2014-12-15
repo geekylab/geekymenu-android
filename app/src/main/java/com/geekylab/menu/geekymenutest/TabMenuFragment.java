@@ -62,9 +62,14 @@ public class TabMenuFragment extends DebugFragment {
     }
 
     @Override
+    String getClassTag() {
+        return TAG;
+    }
+
+    @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setRetainInstance(true);
+//        setRetainInstance(true);
         if (getArguments() != null) {
             mStoreId = getArguments().getString(ARG_STORE_ID);
             mTableId = getArguments().getString(ARG_TABLE_ID);
@@ -135,6 +140,7 @@ public class TabMenuFragment extends DebugFragment {
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
+        ((DashBoardActivity) activity).onSectionAttached(1);
 //        try {
 //            mListener = (OnFragmentInteractionListener) activity;
 //        } catch (ClassCastException e) {
