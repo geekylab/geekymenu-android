@@ -3,6 +3,7 @@ package com.geekylab.menu.geekymenutest;
 import android.app.Activity;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -18,7 +19,7 @@ import android.view.ViewGroup;
 
 
 public class DashBoardActivity extends ActionBarActivity
-        implements NavigationDrawerFragment.NavigationDrawerCallbacks {
+        implements NavigationDrawerFragment.NavigationDrawerCallbacks, CheckInFragment.OnFragmentInteractionListener {
 
     private static final String TAG = DashBoardActivity.class.getSimpleName();
     /**
@@ -120,6 +121,11 @@ public class DashBoardActivity extends ActionBarActivity
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onFragmentInteraction(Uri uri) {
+
     }
 
     /**

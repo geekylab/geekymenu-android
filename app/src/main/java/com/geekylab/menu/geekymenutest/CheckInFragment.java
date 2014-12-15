@@ -1,6 +1,7 @@
 package com.geekylab.menu.geekymenutest;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -8,6 +9,8 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+
+import java.util.List;
 
 
 /**
@@ -23,9 +26,12 @@ public class CheckInFragment extends Fragment {
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
     private static final String TAG = CheckInFragment.class.getSimpleName();
+    private static final int SCANNER_REQUEST_CODE = 1234;
+    public static final String ARG_STORE_ID = "store_id";
+    public static final String ARG_TABLE_ID = "table_id";
 
-    private String mParam1;
-    private String mParam2;
+    private String mStore;
+    private String mTableId;
 
     private OnFragmentInteractionListener mListener;
 
@@ -51,10 +57,10 @@ public class CheckInFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
-        }
+//        if (getArguments() != null) {
+//            mParam1 = getArguments().getString(ARG_PARAM1);
+//            mParam2 = getArguments().getString(ARG_PARAM2);
+//        }
     }
 
     @Override
@@ -67,6 +73,11 @@ public class CheckInFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 Log.d(TAG, "do read qr code");
+
+                Intent zxing_intent = new Intent("com.google.zxing.client.android.SCAN");
+                zxing_intent.putExtra("SCAN_MODE", "QR_CODE_MODE");
+                startActivityForResult(zxing_intent, SCANNER_REQUEST_CODE);
+
             }
         });
         return view;
@@ -82,12 +93,12 @@ public class CheckInFragment extends Fragment {
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
-//        try {
-//            mListener = (OnFragmentInteractionListener) activity;
-//        } catch (ClassCastException e) {
-//            throw new ClassCastException(activity.toString()
-//                    + " must implement OnFragmentInteractionListener");
-//        }
+        try {
+            mListener = (OnFragmentInteractionListener) activity;
+        } catch (ClassCastException e) {
+            throw new ClassCastException(activity.toString()
+                    + " must implement OnFragmentInteractionListener");
+        }
     }
 
     @Override
@@ -111,4 +122,55 @@ public class CheckInFragment extends Fragment {
         public void onFragmentInteraction(Uri uri);
     }
 
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent intent) {
+
+        if (requestCode == SCANNER_REQUEST_CODE) {
+            // Handle scan intent
+            if (resultCode == Activity.RESULT_OK) {
+                // Handle successful scan
+                String contents = intent.getStringExtra("SCAN_RESULT");
+                String formatName = intent.getStringExtra("SCAN_RESULT_FORMAT");
+                byte[] rawBytes = intent.getByteArrayExtra("SCAN_RESULT_BYTES");
+                int intentOrientation = intent.getIntExtra("SCAN_RESULT_ORIENTATION", Integer.MIN_VALUE);
+                Integer orientation = (intentOrientation == Integer.MIN_VALUE) ? null : intentOrientation;
+                String errorCorrectionLevel = intent.getStringExtra("SCAN_RESULT_ERROR_CORRECTION_LEVEL");
+
+                try {
+                    Uri uri = Uri.parse(contents);
+                    Log.d(TAG, "Response URI : " + contents);
+                    if (uri.getHost().equals("menu.geekylab.net")) {
+                        List<String> pathSegments = uri.getPathSegments();
+                        if (pathSegments.size() >= 2) {
+                            if (pathSegments.get(0).equals("_store")) {
+
+                                String mStoreId = pathSegments.get(1);
+                                Log.d(TAG, "mStoreId : " + mStoreId);
+                                Log.d(TAG, "mTableId : " + mTableId);
+
+                                String mTableId = null;
+                                if (pathSegments.size() >= 3) {
+                                    mTableId = pathSegments.get(2);
+                                }
+
+                                //check table
+                                Intent menuIntent = new Intent(CheckInFragment.this.getActivity(), MenuActivity.class);
+                                menuIntent.putExtra(ARG_STORE_ID, mStoreId);
+                                menuIntent.putExtra(ARG_TABLE_ID, mTableId);
+                                startActivity(menuIntent);
+                            }
+                        }
+                    }
+                } catch (Exception e) {
+                    Log.d(TAG, e.getMessage());
+                }
+
+
+            } else if (resultCode == Activity.RESULT_CANCELED) {
+                // Handle cancel
+            }
+        } else {
+            // Handle other intents
+        }
+    }
 }
