@@ -146,7 +146,6 @@ public class StoreFragment extends DebugFragment implements IFTaskCallback {
                 }
                 storeEntity.setImages(storeImageEntityList);
             }
-
             Log.d(TAG, storeEntity.toString());
             setUpView(storeEntity);
         }
