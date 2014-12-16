@@ -6,6 +6,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
 import com.geekylab.menu.geekymenutest.db.table.OrderTable;
+import com.geekylab.menu.geekymenutest.db.table.StoreCacheTable;
 
 /**
  * Created by johna on 26/11/14.
@@ -14,7 +15,7 @@ import com.geekylab.menu.geekymenutest.db.table.OrderTable;
 public class MySQLiteOpenHelper extends SQLiteOpenHelper {
 
     public static final String DB = "geekymenu1.db";
-    public static final int DB_VERSION = 3;
+    public static final int DB_VERSION = 5;
     private static final String TAG = "MySQLiteOpenHelper";
 
     public MySQLiteOpenHelper(Context c) {
@@ -26,6 +27,7 @@ public class MySQLiteOpenHelper extends SQLiteOpenHelper {
         db.execSQL(getGlobalCategoryTableSql());
         db.execSQL(getOrderTableSql());
         db.execSQL(getOrderItemTableSql());
+        db.execSQL(getStoreCacheTableSql());
     }
 
     @Override
@@ -33,6 +35,7 @@ public class MySQLiteOpenHelper extends SQLiteOpenHelper {
         db.execSQL(dropGlobalCategoryTable());
         db.execSQL(dropOrderTableSql());
         db.execSQL(dropOrderItemTableSql());
+        db.execSQL(dropStoreCacheTable());
         onCreate(db);
     }
 
@@ -68,6 +71,20 @@ public class MySQLiteOpenHelper extends SQLiteOpenHelper {
                 ");";
     }
 
+    private String getStoreCacheTableSql() {
+        return "create table " + StoreCacheTable.TABLE_NAME + " (" +
+                StoreCacheTable.COL_ID + " TEXT primary key, " +
+                StoreCacheTable.COL_STORE_NAME + " TEXT not null, " +
+                StoreCacheTable.COL_DESCRIPTION + " TEXT, " +
+                StoreCacheTable.COL_TEL + " TEXT, " +
+                StoreCacheTable.COL_ADDRESS1 + " TEXT, " +
+                StoreCacheTable.COL_START_OPENING_HOUR + " TEXT, " +
+                StoreCacheTable.COL_END_OPENING_HOUR + " TEXT, " +
+                StoreCacheTable.COL_LAST_ORDER_TIME + " TEXT, " +
+                "created_at DATETIME DEFAULT CURRENT_TIMESTAMP " +
+                ");";
+    }
+
     private String dropOrderTableSql() {
         return "DROP TABLE IF EXISTS user_order;";
     }
@@ -78,5 +95,9 @@ public class MySQLiteOpenHelper extends SQLiteOpenHelper {
 
     private String dropGlobalCategoryTable() {
         return "DROP TABLE IF EXISTS global_category;";
+    }
+
+    private String dropStoreCacheTable() {
+        return "DROP TABLE IF EXISTS " + StoreCacheTable.TABLE_NAME + ";";
     }
 }

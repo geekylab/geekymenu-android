@@ -68,11 +68,6 @@
             <!--</intent-filter>-->
         <!--</activity>-->
         <activity
-            android:name=".LoginActivity"
-            android:label="@string/title_activity_login"
-            android:windowSoftInputMode="adjustResize|stateHidden" >
-        </activity>
-        <activity
             android:name=".ItemActivity"
             android:label="@string/title_activity_item" >
         </activity>

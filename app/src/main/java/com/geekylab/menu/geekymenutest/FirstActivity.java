@@ -116,7 +116,7 @@ public class FirstActivity extends Activity {
                         //register regId
                         gcm = GoogleCloudMessaging.getInstance(FirstActivity.this);
                         regid = getRegistrationId(context);
-                        if (regid.isEmpty()) {
+                        if (true || regid.isEmpty()) {
                             progressDialog = ProgressDialog.show(FirstActivity.this, "Registration service", "Waitng for results....");
                             registerInBackground();
                         }
@@ -152,7 +152,7 @@ public class FirstActivity extends Activity {
                 @Override
                 public void onClick(View view) {
                     mServiceToken = getServiceToken(context);
-                    if (mServiceToken.isEmpty()) {
+                    if (true || mServiceToken.isEmpty()) {
                         pickUserAccount();
                     } else {
                         Intent intent = new Intent(FirstActivity.this, DashBoardActivity.class);

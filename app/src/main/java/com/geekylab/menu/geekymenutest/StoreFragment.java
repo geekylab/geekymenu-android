@@ -11,6 +11,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.geekylab.menu.geekymenutest.db.entity.StoreEntity;
+import com.geekylab.menu.geekymenutest.db.table.StoreCacheTable;
 import com.geekylab.menu.geekymenutest.dialog.OnTheTableFragmentDialog;
 import com.geekylab.menu.geekymenutest.network.DownloadJsonAsyncTaskHelper;
 import com.geekylab.menu.geekymenutest.network.IFTaskCallback;
@@ -109,7 +110,6 @@ public class StoreFragment extends DebugFragment implements IFTaskCallback {
 
     @Override
     public void onFinish(Object obj) {
-        Log.d(TAG, "onFinish");
         JSONObject jsonObject = (JSONObject) obj;
         if (jsonObject != null) {
             Boolean status;
@@ -136,6 +136,8 @@ public class StoreFragment extends DebugFragment implements IFTaskCallback {
                             imagesUrls.add(Params.OPEN_API_IMAGE_URL + "/" + imagesArray.get(j).toString());
                         }
                         storeEntity.setImages(imagesUrls);
+                        StoreCacheTable storeCacheTable = new StoreCacheTable(StoreFragment.this.getActivity());
+                        storeCacheTable.save(storeEntity);
                     }
 
                     setUpView(storeEntity);
