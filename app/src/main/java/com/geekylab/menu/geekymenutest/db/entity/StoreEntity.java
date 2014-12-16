@@ -11,7 +11,7 @@ public class StoreEntity implements Serializable {
     protected String id;
     protected String store_name;
     private int seatCount;
-    private ArrayList<String> images;
+    private ArrayList<StoreImageEntity> images;
     private String tel;
     private String address1;
     private String startOpeningHour;
@@ -46,12 +46,12 @@ public class StoreEntity implements Serializable {
         return seatCount;
     }
 
-    public StoreEntity setImages(ArrayList<String> images) {
+    public StoreEntity setImages(ArrayList<StoreImageEntity> images) {
         this.images = images;
         return this;
     }
 
-    public ArrayList<String> getImages() {
+    public ArrayList<StoreImageEntity> getImages() {
         return images;
     }
 

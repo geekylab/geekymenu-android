@@ -1,6 +1,7 @@
 package com.geekylab.menu.geekymenutest;
 
 
+import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.util.Log;
@@ -11,7 +12,9 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.geekylab.menu.geekymenutest.db.entity.StoreEntity;
+import com.geekylab.menu.geekymenutest.db.entity.StoreImageEntity;
 import com.geekylab.menu.geekymenutest.db.table.StoreCacheTable;
+import com.geekylab.menu.geekymenutest.db.table.StoreImagesCacheTable;
 import com.geekylab.menu.geekymenutest.dialog.OnTheTableFragmentDialog;
 import com.geekylab.menu.geekymenutest.network.DownloadJsonAsyncTaskHelper;
 import com.geekylab.menu.geekymenutest.network.IFTaskCallback;
@@ -44,6 +47,8 @@ public class StoreFragment extends DebugFragment implements IFTaskCallback {
     private String mTableID;
     protected View inflate;
     private ImageLoader loader;
+    private StoreCacheTable mStoreCacheTable;
+    private StoreImagesCacheTable mStoreImagesCacheTable;
 
     public static StoreFragment newInstance(int sectionNumber, String storeId, String TableId) {
         StoreFragment fragment = new StoreFragment();
@@ -86,8 +91,8 @@ public class StoreFragment extends DebugFragment implements IFTaskCallback {
 
         inflate = inflater.inflate(R.layout.fragment_store, container, false);
 
-        String url = Params.OPEN_API_STORE_URL + "/" + mStoreID + "?l=" + defaultLanguage;
-        new DownloadJsonAsyncTaskHelper(getActivity(), this, HttpPost.METHOD_NAME).execute(url);
+        mStoreCacheTable = StoreCacheTable.getInstance(getActivity());
+        mStoreImagesCacheTable = StoreImagesCacheTable.getInstance(getActivity());
 
         View onTheTableButton = inflate.findViewById(R.id.imOnTheTableButton);
 
@@ -95,8 +100,9 @@ public class StoreFragment extends DebugFragment implements IFTaskCallback {
             onTheTableButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    OnTheTableFragmentDialog onTheTableFragmentDialog = OnTheTableFragmentDialog.newInstance(mStoreID, mTableID);
-                    onTheTableFragmentDialog.show(getFragmentManager(), getString(R.string.im_on_the_table));
+                    loadByNetwork();
+//                    OnTheTableFragmentDialog onTheTableFragmentDialog = OnTheTableFragmentDialog.newInstance(mStoreID, mTableID);
+//                    onTheTableFragmentDialog.show(getFragmentManager(), getString(R.string.im_on_the_table));
                 }
             });
         } else {
@@ -107,6 +113,49 @@ public class StoreFragment extends DebugFragment implements IFTaskCallback {
         return inflate;
     }
 
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        Cursor StoreCursor = mStoreCacheTable.findById(mStoreID);
+        if (StoreCursor.getCount() == 0) {
+            Log.d(TAG, "Load from network");
+            loadByNetwork();
+        } else {
+            Log.d(TAG, "load from local");
+            StoreCursor.moveToFirst();
+            StoreEntity storeEntity = new StoreEntity();
+            storeEntity.setId(StoreCursor.getString(StoreCursor.getColumnIndex(StoreCacheTable.COL_ID)));
+            storeEntity.setStoreName(StoreCursor.getString(StoreCursor.getColumnIndex(StoreCacheTable.COL_STORE_NAME)));
+            storeEntity.setAddress1(StoreCursor.getString(StoreCursor.getColumnIndex(StoreCacheTable.COL_ADDRESS1)));
+            storeEntity.setDescription(StoreCursor.getString(StoreCursor.getColumnIndex(StoreCacheTable.COL_DESCRIPTION)));
+            storeEntity.setEndOpeningHour(StoreCursor.getString(StoreCursor.getColumnIndex(StoreCacheTable.COL_END_OPENING_HOUR)));
+            storeEntity.setStartOpeningHour(StoreCursor.getString(StoreCursor.getColumnIndex(StoreCacheTable.COL_START_OPENING_HOUR)));
+            storeEntity.setLastOrderTime(StoreCursor.getString(StoreCursor.getColumnIndex(StoreCacheTable.COL_LAST_ORDER_TIME)));
+            storeEntity.setTel(StoreCursor.getString(StoreCursor.getColumnIndex(StoreCacheTable.COL_TEL)));
+
+            //load images
+            Cursor imagesCursor = mStoreImagesCacheTable.findByStoreId(mStoreID);
+            ArrayList<StoreImageEntity> storeImageEntityList = new ArrayList<StoreImageEntity>();
+            if (imagesCursor.getCount() > 0) {
+                while (imagesCursor.moveToNext()) {
+                    StoreImageEntity imageEntity = new StoreImageEntity();
+                    imageEntity.setId(imagesCursor.getString(imagesCursor.getColumnIndex(StoreImagesCacheTable.COL_ID)));
+                    imageEntity.setImageUrl(imagesCursor.getString(imagesCursor.getColumnIndex(StoreImagesCacheTable.COL_IMAGE_URL)));
+                    imageEntity.setStoreId(imagesCursor.getString(imagesCursor.getColumnIndex(StoreImagesCacheTable.COL_STORE_ID)));
+                    storeImageEntityList.add(imageEntity);
+                }
+                storeEntity.setImages(storeImageEntityList);
+            }
+
+            Log.d(TAG, storeEntity.toString());
+            setUpView(storeEntity);
+        }
+    }
+
+    private void loadByNetwork() {
+        String url = Params.OPEN_API_STORE_URL + "/" + mStoreID + "?l=" + defaultLanguage;
+        new DownloadJsonAsyncTaskHelper(getActivity(), this, HttpPost.METHOD_NAME).execute(url);
+    }
 
     @Override
     public void onFinish(Object obj) {
@@ -131,12 +180,17 @@ public class StoreFragment extends DebugFragment implements IFTaskCallback {
 
                     if (storeData.has("images")) {
                         JSONArray imagesArray = storeData.getJSONArray("images");
-                        ArrayList<String> imagesUrls = new ArrayList<String>();
+                        ArrayList<StoreImageEntity> imagesUrls = new ArrayList<StoreImageEntity>();
                         for (int j = 0; j < imagesArray.length(); j++) {
-                            imagesUrls.add(Params.OPEN_API_IMAGE_URL + "/" + imagesArray.get(j).toString());
+                            StoreImageEntity imageEntity = new StoreImageEntity();
+                            imageEntity.setId(imagesArray.get(j).toString());
+                            imageEntity.setImageUrl(Params.OPEN_API_IMAGE_URL + "/" + imagesArray.get(j).toString());
+                            imageEntity.setStoreId(mStoreID);
+                            imagesUrls.add(imageEntity);
+//                            imagesUrls.add(Params.OPEN_API_IMAGE_URL + "/" + imagesArray.get(j).toString());
                         }
                         storeEntity.setImages(imagesUrls);
-                        StoreCacheTable storeCacheTable = new StoreCacheTable(StoreFragment.this.getActivity());
+                        StoreCacheTable storeCacheTable = StoreCacheTable.getInstance(StoreFragment.this.getActivity());
                         storeCacheTable.save(storeEntity);
                     }
 
@@ -163,9 +217,9 @@ public class StoreFragment extends DebugFragment implements IFTaskCallback {
 
             ImageView headerImageView = (ImageView) getView().findViewById(R.id.headerImageView);
             if (headerImageView != null) {
-                ArrayList<String> images = storeEntity.getImages();
-                if (images.size() > 0) {
-                    String categoryImageUrl = images.get(0);
+                ArrayList<StoreImageEntity> images = storeEntity.getImages();
+                if (images != null && images.size() > 0) {
+                    String categoryImageUrl = images.get(0).getImageUrl();
                     Log.d(TAG, "Image url : " + categoryImageUrl);
 //                    headerImageView.setTag(categoryImageUrl);
                     loader.displayImage(categoryImageUrl, headerImageView);

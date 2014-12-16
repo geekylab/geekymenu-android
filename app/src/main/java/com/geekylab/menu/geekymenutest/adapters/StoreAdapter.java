@@ -7,19 +7,18 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.geekylab.menu.geekymenutest.R;
-import com.geekylab.menu.geekymenutest.db.entity.GlobalCategoryEntity;
 import com.geekylab.menu.geekymenutest.db.entity.StoreEntity;
-import com.geekylab.menu.geekymenutest.network.DownloadImageAsyncTaskHelper;
+import com.geekylab.menu.geekymenutest.db.entity.StoreImageEntity;
 import com.geekylab.menu.geekymenutest.network.ImageDownloader;
 
 import java.util.ArrayList;
 
 /**
  * Created by johna on 25/11/14.
+ * kodokux System
  */
 public class StoreAdapter extends ArrayAdapter<StoreEntity> {
     private static final String TAG = "GlobalCategoryAdapter";
@@ -52,10 +51,10 @@ public class StoreAdapter extends ArrayAdapter<StoreEntity> {
         String storeName = i.getStoreName();
         String tel = i.getTel();
 
-        ArrayList<String> images = i.getImages();
+        ArrayList<StoreImageEntity> images = i.getImages();
         String storeMainImageUrl = null;
         if (images.size() > 0) {
-            storeMainImageUrl = images.get(0);
+            storeMainImageUrl = images.get(0).getImageUrl();
         }
 
 //        ProgressBar categoryImageViewProgressBar = (ProgressBar) v.findViewById(R.id.imageViewProgressBar);

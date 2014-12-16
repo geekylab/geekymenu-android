@@ -51,7 +51,7 @@ public class FirstActivity extends Activity {
     private static final String PROPERTY_APP_VERSION = "appVersion";
     private static final String PROPERTY_USER_TOKEN = "user_token";
     private static final String PROPERTY_SERVICE_TOKEN = "service_token";
-    private final static int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
+    private static final int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
     private static final int REQUEST_CODE_PICK_ACCOUNT = 1000;
     private static final int REQ_SIGN_IN_REQUIRED = 55664;
     private static final String GOOGLE_TOKEN_ACTION = "google_token_action";
@@ -90,8 +90,6 @@ public class FirstActivity extends Activity {
     private BroadcastReceiver taskReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            if (progressDialog != null)
-                progressDialog.dismiss();
 
             String response = "";
             //google token result
@@ -117,16 +115,28 @@ public class FirstActivity extends Activity {
                         gcm = GoogleCloudMessaging.getInstance(FirstActivity.this);
                         regid = getRegistrationId(context);
                         if (true || regid.isEmpty()) {
-                            progressDialog = ProgressDialog.show(FirstActivity.this, "Registration service", "Waitng for results....");
+                            if (progressDialog != null) {
+                                progressDialog.setTitle("Registration service");
+                                progressDialog.setMessage("Waitng for results....");
+                            }
                             registerInBackground();
+                        } else {
+                            if (progressDialog != null)
+                                progressDialog.dismiss();
+                            response = intent.getStringExtra(RestTask.HTTP_RESPONSE);
+                            Intent DashBoardIntent = new Intent(FirstActivity.this, DashBoardActivity.class);
+                            startActivity(DashBoardIntent);
+                            finish();
                         }
-
-                        Intent DashBoardIntent = new Intent(FirstActivity.this, DashBoardActivity.class);
-                        startActivity(DashBoardIntent);
                     }
                 }
             } else {
+                if (progressDialog != null)
+                    progressDialog.dismiss();
                 response = intent.getStringExtra(RestTask.HTTP_RESPONSE);
+                Intent DashBoardIntent = new Intent(FirstActivity.this, DashBoardActivity.class);
+                startActivity(DashBoardIntent);
+                finish();
             }
 
             Log.d(TAG, "BroadcastReceiver : " + response);
@@ -157,6 +167,7 @@ public class FirstActivity extends Activity {
                     } else {
                         Intent intent = new Intent(FirstActivity.this, DashBoardActivity.class);
                         startActivity(intent);
+                        finish();
                     }
                 }
             });
