@@ -61,6 +61,7 @@ public class DashBoardActivity extends DebugActivity
     public static final String ARG_USER_TOKEN = "user_token";
     public static final String ARG_TABLE_TOKEN = "table_token";
     private static final String TABLE_CHECK_IN_ACTION = "TABLE_CHECK_IN_ACTION";
+    public static final String ACCEPT_CHECK_IN_ACTION = "ACCEPT_CHECK_IN_ACTION";
     /**
      * Fragment managing the behaviors, interactions and presentation of the navigation drawer.
      */
@@ -101,17 +102,14 @@ public class DashBoardActivity extends DebugActivity
                         JSONObject checkInJsonObject = new JSONObject(response);
                         if (checkInJsonObject.has("status") && checkInJsonObject.getBoolean("status")) {
                             //OK
-                            JSONObject checkInDataJsonObject = checkInJsonObject.getJSONObject("data");
-                            if (myService != null && checkInDataJsonObject != null) {
+                            if (myService != null) {
                                 if (!myService.isConnected()) {
                                     myService.setUrl(Params.HOST_URL);
                                     myService.setStoreId(mStoreId);
                                     myService.setTableId(mTableId);
                                     myService.setUserToken(mServiceToken);
-
-                                    JSONObject orderJsonObject = checkInDataJsonObject.getJSONObject("order");
-                                    myService.setTableToken(orderJsonObject.getString("order_token"));
                                     startService(serviceIntent);
+                                    Log.d(TAG, "start orderService");
                                 }
                             } else {
                                 Log.d(TAG, "myService is null!!!! fuck!!");
@@ -121,6 +119,10 @@ public class DashBoardActivity extends DebugActivity
                         e.printStackTrace();
                     }
                 }
+            } else if (intent.getAction().equals(ACCEPT_CHECK_IN_ACTION)) {
+                Log.d(TAG, "ACCEPT_CHECK_IN_ACTION");
+                String response = intent.getStringExtra(OrderService.SOCKET_RESPONSE);
+                Log.d(TAG, response);
             }
         }
     };
@@ -167,6 +169,7 @@ public class DashBoardActivity extends DebugActivity
         super.onResume();
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(TABLE_CHECK_IN_ACTION);
+        intentFilter.addAction(ACCEPT_CHECK_IN_ACTION);
         registerReceiver(taskReceiver, intentFilter);
 
         if (serviceIntent != null)

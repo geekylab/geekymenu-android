@@ -43,5 +43,7 @@
     <string name="title_section1">Section 1</string>
     <string name="title_section2">Section 2</string>
     <string name="title_section3">Section 3</string>
+    <string name="request_accept">Request Accept</string>
+    <string name="restaurent_accept_request">The \"%s\" accepted his request. now you can already place your order.</string>
 
 </resources>

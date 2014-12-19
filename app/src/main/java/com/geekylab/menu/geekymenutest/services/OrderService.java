@@ -25,6 +25,7 @@ public class OrderService extends Service {
     private static final String TAG = "MyService";
     private static final int REQUEST_CODE_MAIN_ACTIVITY = 1234;
     private static final int NOTIFICATION_CLICK = 12345;
+    public static final String SOCKET_RESPONSE = "socket_response";
     Socket socket;
     final IBinder binder = new MyBinder();
     private String url;
@@ -71,6 +72,7 @@ public class OrderService extends Service {
     }
 
     public void setUserToken(String userToken) {
+        Log.d(TAG, "setUserToken :" + userToken);
         mUserToken = userToken;
 //        tryToConnect();
     }
@@ -79,11 +81,6 @@ public class OrderService extends Service {
         this.url = url;
 //        tryToConnect();
     }
-
-    public void setTableToken(String order_token) {
-        mOrderToken = order_token;
-    }
-
 
     public class MyBinder extends Binder {
         public OrderService getService() {
@@ -106,7 +103,7 @@ public class OrderService extends Service {
     }
 
 
-    private void sendNotification() {
+    private void sendNotification(String ticker, String title, String content) {
         // Intent の作成
         Intent intent = new Intent(OrderService.this, DashBoardActivity.class);
         PendingIntent contentIntent = PendingIntent.getActivity(
@@ -120,13 +117,13 @@ public class OrderService extends Service {
                 getApplicationContext());
         builder.setContentIntent(contentIntent);
         // ステータスバーに表示されるテキスト
-        builder.setTicker("Ticker");
+        builder.setTicker(ticker);
         // アイコン
         builder.setSmallIcon(R.drawable.ic_call);
         // Notificationを開いたときに表示されるタイトル
-        builder.setContentTitle("ContentTitle");
+        builder.setContentTitle(title);
         // Notificationを開いたときに表示されるサブタイトル
-        builder.setContentText("ContentText");
+        builder.setContentText(content);
         // Notificationを開いたときに表示されるアイコン
         builder.setLargeIcon(largeIcon);
         // 通知するタイミング
@@ -154,25 +151,28 @@ public class OrderService extends Service {
         if (url != null &&
                 mTableId != null &&
                 mUserToken != null &&
-                mStoreId != null &&
-                mOrderToken != null) {
-
+                mStoreId != null) {
             if (socket == null) {
                 try {
                     IO.Options opts = new IO.Options();
-                    opts.query = "service_token=" + mUserToken + "&store_id=" + mStoreId + "&order_token=" + mOrderToken;
+                    opts.query = "service_token=" + mUserToken + "&store_id=" + mStoreId;
                     socket = IO.socket(url, opts);
-
                     socket.on(Socket.EVENT_CONNECT, new Emitter.Listener() {
                         @Override
                         public void call(Object... args) {
                             Log.d(TAG, Arrays.toString(args));
-                            sendNotification();
                         }
-                    }).on("news", new Emitter.Listener() {
+                    }).on("receive_check_in", new Emitter.Listener() {
                         @Override
                         public void call(Object... args) {
                             Log.d(TAG, Arrays.toString(args));
+                            if (args.length > 0) {
+                                //[{"status":0,"order":{"__v":0,"order_token":"c0dc2bcf36800c5d75fdb49e8bebdb89eb9fb1d2","status":1,"table":"54946933f770d62d0075057e","order_number":14,"_id":"549497a41eda58090243eafb","created":"2014-12-19T21:24:52.236Z","request_count":1,"orderItems":[],"customers":["54946952bc39285e001b3a6e"]}}]
+                                sendNotification(getString(R.string.request_accept), getString(R.string.request_accept), getString(R.string.restaurent_accept_request, "test"));
+                                Intent intent = new Intent(DashBoardActivity.ACCEPT_CHECK_IN_ACTION);
+                                intent.putExtra(SOCKET_RESPONSE, args[0].toString());
+                                getApplicationContext().sendBroadcast(intent);
+                            }
                         }
 
                     }).on(Socket.EVENT_DISCONNECT, new Emitter.Listener() {

@@ -109,6 +109,7 @@
 
         <activity
             android:name=".DashBoardActivity"
+            android:launchMode="singleTop"
             android:label="@string/title_activity_dash_board" >
         </activity>
 
