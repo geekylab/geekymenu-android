@@ -12,6 +12,7 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.provider.ContactsContract;
 import android.util.Log;
 import android.view.View;
@@ -23,6 +24,7 @@ import android.widget.Button;
 import com.geekylab.menu.geekymenutest.network.GoogleTokenRestTask;
 import com.geekylab.menu.geekymenutest.network.RestTask;
 import com.geekylab.menu.geekymenutest.openapi.Params;
+import com.geekylab.menu.geekymenutest.utils.AppParams;
 import com.google.android.gms.common.AccountPicker;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
@@ -114,7 +116,7 @@ public class FirstActivity extends Activity {
                         //register regId
                         gcm = GoogleCloudMessaging.getInstance(FirstActivity.this);
                         regid = getRegistrationId(context);
-                        if (true || regid.isEmpty()) {
+                        if (regid.isEmpty()) {
                             if (progressDialog != null) {
                                 progressDialog.setTitle("Registration service");
                                 progressDialog.setMessage("Waitng for results....");
@@ -338,17 +340,10 @@ public class FirstActivity extends Activity {
      * @return registrationId Geeky Menu Service Token
      */
     private String getServiceToken(Context context) {
-        final SharedPreferences prefs = getGCMPreferences(context);
+        final SharedPreferences prefs = getSharedPreferences(AppParams.SHARED_PREF_NAME, Activity.MODE_PRIVATE);
         String serviceToken = prefs.getString(PROPERTY_SERVICE_TOKEN, "");
         if (serviceToken.isEmpty()) {
             Log.i(TAG, "service token not found.");
-            return "";
-        }
-
-        int registeredVersion = prefs.getInt(PROPERTY_APP_VERSION, Integer.MIN_VALUE);
-        int currentVersion = getAppVersion(context);
-        if (registeredVersion != currentVersion) {
-            Log.i(TAG, "App version changed.");
             return "";
         }
         return serviceToken;
@@ -481,26 +476,11 @@ public class FirstActivity extends Activity {
      * Stores the registration ID and app versionCode in the application's
      * {@code SharedPreferences}.
      *
-     * @param context     application's context.
-     * @param googleToken registration ID
-     */
-    private void storeGoogleToken(Context context, String googleToken) {
-        final SharedPreferences prefs = getGCMPreferences(context);
-        Log.i(TAG, "Saving google token " + googleToken);
-        SharedPreferences.Editor editor = prefs.edit();
-        editor.putString(PROPERTY_USER_TOKEN, googleToken);
-        editor.commit();
-    }
-
-    /**
-     * Stores the registration ID and app versionCode in the application's
-     * {@code SharedPreferences}.
-     *
      * @param context      application's context.
      * @param serviceToken registration ID
      */
     private void storeServiceToken(Context context, String serviceToken) {
-        final SharedPreferences prefs = getGCMPreferences(context);
+        final SharedPreferences prefs = getSharedPreferences(AppParams.SHARED_PREF_NAME, Activity.MODE_PRIVATE);
         Log.i(TAG, "Saving service Token " + serviceToken);
         SharedPreferences.Editor editor = prefs.edit();
         editor.putString(PROPERTY_SERVICE_TOKEN, serviceToken);

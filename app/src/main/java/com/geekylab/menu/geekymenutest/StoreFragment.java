@@ -2,6 +2,7 @@ package com.geekylab.menu.geekymenutest;
 
 
 import android.database.Cursor;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.util.Log;
@@ -15,11 +16,13 @@ import com.geekylab.menu.geekymenutest.db.entity.StoreEntity;
 import com.geekylab.menu.geekymenutest.db.entity.StoreImageEntity;
 import com.geekylab.menu.geekymenutest.db.table.StoreCacheTable;
 import com.geekylab.menu.geekymenutest.db.table.StoreImagesCacheTable;
-import com.geekylab.menu.geekymenutest.dialog.OnTheTableFragmentDialog;
 import com.geekylab.menu.geekymenutest.network.DownloadJsonAsyncTaskHelper;
 import com.geekylab.menu.geekymenutest.network.IFTaskCallback;
 import com.geekylab.menu.geekymenutest.network.ImageDownloader;
 import com.geekylab.menu.geekymenutest.openapi.Params;
+import com.github.nkzawa.emitter.Emitter;
+import com.github.nkzawa.socketio.client.IO;
+import com.github.nkzawa.socketio.client.Socket;
 import com.nostra13.universalimageloader.core.ImageLoader;
 
 import org.apache.http.client.methods.HttpPost;
@@ -27,9 +30,10 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Locale;
-
 
 /**
  * A simple {@link Fragment} subclass.
@@ -75,7 +79,6 @@ public class StoreFragment extends DebugFragment implements IFTaskCallback {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         setRetainInstance(true);
         loader = ImageLoader.getInstance();
         if (getArguments() != null) {

@@ -5,13 +5,28 @@
               android:orientation="vertical"
               tools:context="com.geekylab.menu.geekymenutest.StoreFragment">
 
-    <Button
-        android:id="@+id/imOnTheTableButton"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1"
-        android:text="@string/im_on_the_table"
-        />
+        android:layout_weight="1">
+
+        <Button
+            android:id="@+id/imOnTheTableButton"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/im_on_the_table"
+            />
+
+        <Button
+            android:id="@+id/socketTest"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="socket test"
+            />
+    </LinearLayout>
+
 
     <RelativeLayout
         android:layout_width="match_parent"

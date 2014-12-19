@@ -1,9 +1,21 @@
 package com.geekylab.menu.geekymenutest;
 
 import android.app.Activity;
+import android.app.ActivityManager;
+import android.app.AlertDialog;
+import android.content.BroadcastReceiver;
+import android.content.ComponentName;
+import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.ServiceConnection;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
+import android.os.IBinder;
+import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
@@ -16,17 +28,39 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.geekylab.menu.geekymenutest.network.GoogleTokenRestTask;
+import com.geekylab.menu.geekymenutest.network.RestTask;
+import com.geekylab.menu.geekymenutest.openapi.Params;
+import com.geekylab.menu.geekymenutest.services.OrderService;
+import com.geekylab.menu.geekymenutest.utils.AppParams;
 import com.nostra13.universalimageloader.cache.memory.impl.LruMemoryCache;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
+
+import org.apache.http.NameValuePair;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpPut;
+import org.apache.http.message.BasicNameValuePair;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.UnsupportedEncodingException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.List;
 
 
 public class DashBoardActivity extends DebugActivity
         implements NavigationDrawerFragment.NavigationDrawerCallbacks, CheckInFragment.OnFragmentInteractionListener {
 
     public static final String TAG = DashBoardActivity.class.getSimpleName();
-    private static final String ARG_STORE_ID = "store_id";
-    private static final String ARG_TABLE_ID = "table_id";
+    public static final String ARG_STORE_ID = "store_id";
+    public static final String ARG_TABLE_ID = "table_id";
+    public static final String ARG_USER_TOKEN = "user_token";
+    public static final String ARG_TABLE_TOKEN = "table_token";
+    private static final String TABLE_CHECK_IN_ACTION = "TABLE_CHECK_IN_ACTION";
     /**
      * Fragment managing the behaviors, interactions and presentation of the navigation drawer.
      */
@@ -39,6 +73,58 @@ public class DashBoardActivity extends DebugActivity
     private String mStoreId;
     private String mTableId;
     private boolean mIsSavedInstanceState = false;
+    private OrderService myService;
+    private Intent serviceIntent;
+    private String mServiceToken;
+
+    ServiceConnection serviceConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            myService = ((OrderService.MyBinder) service).getService();
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            Log.d(TAG, "onServiceDisconnected");
+            myService = null;
+        }
+    };
+
+    private BroadcastReceiver taskReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (intent.getAction().equals(TABLE_CHECK_IN_ACTION)) {
+                String response = intent.getStringExtra(RestTask.HTTP_RESPONSE);
+                Log.d(TAG, "BroadcastReceiver : " + response);
+                if (response != null) {
+                    try {
+                        JSONObject checkInJsonObject = new JSONObject(response);
+                        if (checkInJsonObject.has("status") && checkInJsonObject.getBoolean("status")) {
+                            //OK
+                            JSONObject checkInDataJsonObject = checkInJsonObject.getJSONObject("data");
+                            if (myService != null && checkInDataJsonObject != null) {
+                                if (!myService.isConnected()) {
+                                    myService.setUrl(Params.HOST_URL);
+                                    myService.setStoreId(mStoreId);
+                                    myService.setTableId(mTableId);
+                                    myService.setUserToken(mServiceToken);
+
+                                    JSONObject orderJsonObject = checkInDataJsonObject.getJSONObject("order");
+                                    myService.setTableToken(orderJsonObject.getString("order_token"));
+                                    startService(serviceIntent);
+                                }
+                            } else {
+                                Log.d(TAG, "myService is null!!!! fuck!!");
+                            }
+                        }
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }
+    };
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,6 +137,13 @@ public class DashBoardActivity extends DebugActivity
             Log.d(TAG, "onCreate mTableId : " + mTableId);
             mIsSavedInstanceState = true;
         }
+
+        if (mTableId != null && mStoreId != null) {
+            startOrderService();
+        }
+
+        mServiceToken = getServiceToken(getApplicationContext());
+        serviceIntent = new Intent(DashBoardActivity.this, OrderService.class);
 
         ImageLoaderConfiguration config = new ImageLoaderConfiguration.Builder(getApplicationContext())
                 .memoryCache(new LruMemoryCache(2 * 1024 * 1024))
@@ -67,6 +160,46 @@ public class DashBoardActivity extends DebugActivity
         mNavigationDrawerFragment.setUp(
                 R.id.navigation_drawer,
                 (DrawerLayout) findViewById(R.id.drawer_layout));
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction(TABLE_CHECK_IN_ACTION);
+        registerReceiver(taskReceiver, intentFilter);
+
+        if (serviceIntent != null)
+            bindService(serviceIntent, serviceConnection, Context.BIND_AUTO_CREATE);
+
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        unregisterReceiver(taskReceiver);
+
+        if (serviceIntent != null)
+            unbindService(serviceConnection);
+
+        Log.d(TAG, "onPause unbindService");
+    }
+
+    /**
+     * Check services
+     *
+     * @param serviceClass serviceClass
+     * @return return true if running false if not.
+     */
+    private boolean isMyServiceRunning(Class<?> serviceClass) {
+        ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+        for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
+            //Log.d(TAG, serviceClass.getName() + "==" + service.service.getClassName());
+            if (serviceClass.getName().equals(service.service.getClassName())) {
+                return true;
+            }
+        }
+        return false;
     }
 
 
@@ -190,6 +323,36 @@ public class DashBoardActivity extends DebugActivity
     public void onFragmentInteraction(String storeId, String tableId) {
         mStoreId = storeId;
         mTableId = tableId;
+
+        if (mStoreId != null && mTableId != null) {
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setTitle("Check-in on table?");
+            builder.setPositiveButton("Check-in", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    HttpPost httpPost;
+                    try {
+                        httpPost = new HttpPost(new URI(Params.OPEN_API_TABLE_TOKEN + "/" + mStoreId));
+                        httpPost.addHeader("X-Auth-Hash", mServiceToken);
+                        List<NameValuePair> parameters = new ArrayList<NameValuePair>();
+                        parameters.add(new BasicNameValuePair("service_token", mServiceToken));
+                        parameters.add(new BasicNameValuePair("table_id", mTableId));
+                        httpPost.setEntity(new UrlEncodedFormEntity(parameters));
+
+                        new RestTask(getApplicationContext(), TABLE_CHECK_IN_ACTION)
+                                .execute(httpPost);
+
+                    } catch (URISyntaxException e) {
+                        e.printStackTrace();
+                    } catch (UnsupportedEncodingException e) {
+                        e.printStackTrace();
+                    }
+                }
+            });
+            builder.setNegativeButton("Cancel", null);
+            builder.show();
+        }
+
         Fragment tabMenuFragment = StoreFragment.newInstance(2, storeId, tableId);
         FragmentManager fragmentManager = getSupportFragmentManager();
         fragmentManager.beginTransaction()
@@ -199,6 +362,11 @@ public class DashBoardActivity extends DebugActivity
                 .replace(R.id.container, tabMenuFragment)
                 .commit();
     }
+
+    private void startOrderService() {
+        //service
+    }
+
 
     /**
      * A placeholder fragment containing a simple view.
@@ -244,6 +412,21 @@ public class DashBoardActivity extends DebugActivity
             ((DashBoardActivity) activity).onSectionAttached(
                     getArguments().getInt(ARG_SECTION_NUMBER));
         }
+    }
+
+    /**
+     * @param context Application context
+     * @return registrationId Geeky Menu Service Token
+     */
+    private String getServiceToken(Context context) {
+
+        final SharedPreferences prefs = getSharedPreferences(AppParams.SHARED_PREF_NAME, Activity.MODE_PRIVATE);
+        String serviceToken = prefs.getString("service_token", "");
+        if (serviceToken.isEmpty()) {
+            Log.i(TAG, "service token not found.");
+            return "";
+        }
+        return serviceToken;
     }
 
 }
