@@ -17,7 +17,7 @@ public class MySQLiteOpenHelper extends SQLiteOpenHelper {
 
     private static MySQLiteOpenHelper sSingleton = null;
     public static final String DB = "geekymenu1.db";
-    public static final int DB_VERSION = 6;
+    public static final int DB_VERSION = 7;
     private static final String TAG = "MySQLiteOpenHelper";
 
     public static synchronized MySQLiteOpenHelper getInstance(Context context) {
@@ -60,13 +60,15 @@ public class MySQLiteOpenHelper extends SQLiteOpenHelper {
 
     private String getOrderTableSql() {
         return "create table user_order (" +
-                OrderTable.COL_ID + " INTEGER primary key autoincrement, " +
-                OrderTable.COL_STORE_ID + " TEXT not null, " +
-                OrderTable.COL_ORDER_TOKEN + " TEXT not null, " +
-                OrderTable.COL_ORDER_NUMBER + " TEXT not null, " +
-                OrderTable.COL_TABLE_TOKEN + " INTEGER DEFAULT 0, " +
-                OrderTable.COL_STATUS + " INTEGER DEFAULT 0, " +
-                "created_at DATETIME DEFAULT CURRENT_TIMESTAMP " +
+                OrderTable.COL_ID + " TEXT primary key, " +
+                OrderTable.COL_STORE_ID + " TEXT NOT NULL, " +
+                OrderTable.COL_TABLE_ID + " TEXT NOT NULL, " +
+                OrderTable.COL_ORDER_TOKEN + " TEXT NOT NULL, " +
+                OrderTable.COL_ORDER_NUMBER + " INTEGER NOT NULL DEFAULT 0, " +
+                OrderTable.COL_CUSTOMER_ID + " TEXT NOT NULL, " +
+                OrderTable.COL_TOTAL_PRICE + " DECIMAL NOT NULL DEFAULT 0, " +
+                OrderTable.COL_STATUS + " INTEGER DEFAULT " + OrderTable.ORDER_STATUS_ACTIVE + ", " +
+                OrderTable.COL_CREATED_AT + " DATETIME DEFAULT CURRENT_TIMESTAMP " +
                 ");";
     }
 

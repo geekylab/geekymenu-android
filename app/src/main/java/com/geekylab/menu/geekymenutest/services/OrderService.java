@@ -14,9 +14,14 @@ import android.util.Log;
 
 import com.geekylab.menu.geekymenutest.DashBoardActivity;
 import com.geekylab.menu.geekymenutest.R;
+import com.geekylab.menu.geekymenutest.db.entity.UserOrderEntity;
+import com.geekylab.menu.geekymenutest.db.table.OrderTable;
 import com.github.nkzawa.emitter.Emitter;
 import com.github.nkzawa.socketio.client.IO;
 import com.github.nkzawa.socketio.client.Socket;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.net.URISyntaxException;
 import java.util.Arrays;
@@ -167,11 +172,34 @@ public class OrderService extends Service {
                         public void call(Object... args) {
                             Log.d(TAG, Arrays.toString(args));
                             if (args.length > 0) {
-                                //[{"status":0,"order":{"__v":0,"order_token":"c0dc2bcf36800c5d75fdb49e8bebdb89eb9fb1d2","status":1,"table":"54946933f770d62d0075057e","order_number":14,"_id":"549497a41eda58090243eafb","created":"2014-12-19T21:24:52.236Z","request_count":1,"orderItems":[],"customers":["54946952bc39285e001b3a6e"]}}]
-                                sendNotification(getString(R.string.request_accept), getString(R.string.request_accept), getString(R.string.restaurent_accept_request, "test"));
-                                Intent intent = new Intent(DashBoardActivity.ACCEPT_CHECK_IN_ACTION);
-                                intent.putExtra(SOCKET_RESPONSE, args[0].toString());
-                                getApplicationContext().sendBroadcast(intent);
+                                try {
+                                    JSONObject orderDataJsonObject = new JSONObject(args[0].toString());
+                                    if (orderDataJsonObject.has("status") && orderDataJsonObject.getBoolean("status")) {
+                                        JSONObject orderJsonObject = orderDataJsonObject.getJSONObject("order");
+                                        OrderTable orderTable = OrderTable.getInstance(OrderService.this);
+                                        UserOrderEntity orderEntity = new UserOrderEntity();
+                                        orderEntity.setId(orderJsonObject.getString("_id"));
+                                        orderEntity.setStoreId(mStoreId);
+                                        orderEntity.setTable(orderJsonObject.getString("table"));
+                                        orderEntity.setOrderToken(orderJsonObject.getString("order_token"));
+                                        orderEntity.setOrderNumber(orderJsonObject.getString("order_number"));
+                                        orderEntity.setCustomer(mUserToken);
+                                        orderEntity.setStatus(orderJsonObject.getInt("status"));
+                                        if (orderTable.save(orderEntity) == -1) {
+                                            //TODO: save error;
+                                        } else {
+                                            //update ui
+                                            sendNotification(getString(R.string.request_accept), getString(R.string.request_accept), getString(R.string.restaurent_accept_request, "test"));
+                                            Intent intent = new Intent(DashBoardActivity.ACCEPT_CHECK_IN_ACTION);
+                                            intent.putExtra(SOCKET_RESPONSE, args[0].toString());
+                                            getApplicationContext().sendBroadcast(intent);
+                                        }
+                                    } else {
+                                        //TODO: some error.
+                                    }
+                                } catch (JSONException e) {
+                                    e.printStackTrace();
+                                }
                             }
                         }
 

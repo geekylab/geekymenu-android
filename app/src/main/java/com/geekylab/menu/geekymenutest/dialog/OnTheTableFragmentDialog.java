@@ -130,7 +130,7 @@ public class OnTheTableFragmentDialog extends DialogFragment implements IFTaskCa
                             contentValues.put(OrderTable.COL_ORDER_TOKEN, orderJsonObject.getString("order_token"));
                             contentValues.put(OrderTable.COL_ORDER_NUMBER, orderJsonObject.getString("order_token"));
                             contentValues.put(OrderTable.COL_STORE_ID, mStoreID);
-                            contentValues.put(OrderTable.COL_TABLE_TOKEN, mTableID);
+                            contentValues.put(OrderTable.COL_TABLE_ID, mTableID);
                             contentValues.put(OrderTable.COL_STATUS, orderJsonObject.getString("status"));
                             orderTable.insert(contentValues);
                         } else {

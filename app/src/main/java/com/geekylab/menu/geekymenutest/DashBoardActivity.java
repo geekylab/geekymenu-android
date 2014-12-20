@@ -28,6 +28,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.geekylab.menu.geekymenutest.db.entity.UserOrderEntity;
+import com.geekylab.menu.geekymenutest.db.table.OrderTable;
 import com.geekylab.menu.geekymenutest.network.GoogleTokenRestTask;
 import com.geekylab.menu.geekymenutest.network.RestTask;
 import com.geekylab.menu.geekymenutest.openapi.Params;
@@ -122,6 +124,10 @@ public class DashBoardActivity extends DebugActivity
             } else if (intent.getAction().equals(ACCEPT_CHECK_IN_ACTION)) {
                 Log.d(TAG, "ACCEPT_CHECK_IN_ACTION");
                 String response = intent.getStringExtra(OrderService.SOCKET_RESPONSE);
+                if (response != null) {
+                }
+
+
                 Log.d(TAG, response);
             }
         }
