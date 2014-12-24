@@ -97,21 +97,18 @@ public class FirstActivity extends Activity {
             //google token result
             if (intent.getAction().equals(GOOGLE_TOKEN_ACTION)) {
                 response = intent.getStringExtra(GoogleTokenRestTask.HTTP_RESPONSE);
+                Log.d(TAG, response);
                 if (response != null) {
                     JSONObject jsonObject = null;
                     Boolean status = false;
                     try {
                         jsonObject = new JSONObject(response);
-                        status = jsonObject.getBoolean("status");
-                        if (jsonObject.has("profile")) {
-                            JSONObject profileJsonObject = jsonObject.getJSONObject("profile");
-                            mServiceToken = profileJsonObject.getString("service_token");
-                        }
+                        mServiceToken = jsonObject.getString("token");
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
 
-                    if (status && !mServiceToken.isEmpty()) {
+                    if (!mServiceToken.isEmpty()) {
                         storeServiceToken(context, mServiceToken);
                         //register regId
                         gcm = GoogleCloudMessaging.getInstance(FirstActivity.this);
@@ -452,8 +449,8 @@ public class FirstActivity extends Activity {
 
             HttpPut httpPut;
             try {
-                httpPut = new HttpPut(new URI(Params.OPEN_API_HOST_URL + "/regid"));
-                httpPut.addHeader("X-Auth-Hash", mServiceToken);
+                httpPut = new HttpPut(new URI(Params.USER_REGID_URL));
+                httpPut.setHeader("Authorization", "Bearer "+ mServiceToken);
                 List<NameValuePair> parameters = new ArrayList<NameValuePair>();
                 parameters.add(new BasicNameValuePair("regid", regid));
                 httpPut.setEntity(new UrlEncodedFormEntity(parameters));
