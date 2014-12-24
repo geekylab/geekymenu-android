@@ -100,7 +100,7 @@ public class OnTheTableFragmentDialog extends DialogFragment implements IFTaskCa
                 .setPositiveButton(getString(R.string.ok), new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int id) {
-                        String url = Params.OPEN_API_TABLE_TOKEN + "/" + mStoreID;
+                        String url = Params.OPEN_API_ORDER_URL + "/" + mStoreID;
                         ArrayList<NameValuePair> postParameters = new ArrayList<NameValuePair>();
                         postParameters.add(new BasicNameValuePair("table_token", tableTokenEditText.getText().toString()));
                         postParameters.add(new BasicNameValuePair("table_id", mTableID));

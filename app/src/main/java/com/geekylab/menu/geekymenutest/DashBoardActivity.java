@@ -15,7 +15,6 @@ import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
@@ -28,9 +27,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.geekylab.menu.geekymenutest.db.entity.UserOrderEntity;
-import com.geekylab.menu.geekymenutest.db.table.OrderTable;
-import com.geekylab.menu.geekymenutest.network.GoogleTokenRestTask;
 import com.geekylab.menu.geekymenutest.network.RestTask;
 import com.geekylab.menu.geekymenutest.openapi.Params;
 import com.geekylab.menu.geekymenutest.services.OrderService;
@@ -42,7 +38,6 @@ import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.methods.HttpPut;
 import org.apache.http.message.BasicNameValuePair;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -341,13 +336,12 @@ public class DashBoardActivity extends DebugActivity
                 public void onClick(DialogInterface dialog, int which) {
                     HttpPost httpPost;
                     try {
-                        httpPost = new HttpPost(new URI(Params.OPEN_API_TABLE_TOKEN + "/" + mStoreId));
-                        httpPost.addHeader("X-Auth-Hash", mServiceToken);
+                        httpPost = new HttpPost(new URI(Params.OPEN_API_ORDER_URL));
+                        httpPost.setHeader("Authorization", "Bearer " + mServiceToken);
                         List<NameValuePair> parameters = new ArrayList<NameValuePair>();
-                        parameters.add(new BasicNameValuePair("service_token", mServiceToken));
-                        parameters.add(new BasicNameValuePair("table_id", mTableId));
+                        parameters.add(new BasicNameValuePair("_table", mTableId));
+                        parameters.add(new BasicNameValuePair("_store", mStoreId));
                         httpPost.setEntity(new UrlEncodedFormEntity(parameters));
-
                         new RestTask(getApplicationContext(), TABLE_CHECK_IN_ACTION)
                                 .execute(httpPost);
 

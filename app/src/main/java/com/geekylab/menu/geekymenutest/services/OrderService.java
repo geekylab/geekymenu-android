@@ -160,14 +160,15 @@ public class OrderService extends Service {
             if (socket == null) {
                 try {
                     IO.Options opts = new IO.Options();
-                    opts.query = "service_token=" + mUserToken + "&store_id=" + mStoreId;
+                    opts.query = "token=" + mUserToken;
+                    opts.path = "/socket.io-client";
                     socket = IO.socket(url, opts);
                     socket.on(Socket.EVENT_CONNECT, new Emitter.Listener() {
                         @Override
                         public void call(Object... args) {
                             Log.d(TAG, Arrays.toString(args));
                         }
-                    }).on("receive_check_in", new Emitter.Listener() {
+                    }).on("order:receive", new Emitter.Listener() {
                         @Override
                         public void call(Object... args) {
                             Log.d(TAG, Arrays.toString(args));

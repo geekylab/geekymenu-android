@@ -180,13 +180,14 @@ public class StoreFragment extends DebugFragment implements IFTaskCallback {
                     if (storeData.has("desc"))
                         storeEntity.setDescription(storeData.getString("desc"));
 
-                    if (storeData.has("images")) {
-                        JSONArray imagesArray = storeData.getJSONArray("images");
+                    if (storeData.has("_images")) {
+                        JSONArray imagesArray = storeData.getJSONArray("_images");
                         ArrayList<StoreImageEntity> imagesUrls = new ArrayList<StoreImageEntity>();
                         for (int j = 0; j < imagesArray.length(); j++) {
+                            JSONObject imageObject = imagesArray.getJSONObject(j);
                             StoreImageEntity imageEntity = new StoreImageEntity();
-                            imageEntity.setId(imagesArray.get(j).toString());
-                            imageEntity.setImageUrl(Params.OPEN_API_IMAGE_URL + "/" + imagesArray.get(j).toString());
+                            imageEntity.setId(imageObject.getString("_id"));
+                            imageEntity.setImageUrl(Params.OPEN_API_IMAGE_URL + "/" + imageObject.getString("_id"));
                             imageEntity.setStoreId(mStoreID);
                             imagesUrls.add(imageEntity);
 //                            imagesUrls.add(Params.OPEN_API_IMAGE_URL + "/" + imagesArray.get(j).toString());
